@@ -645,7 +645,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <section className="mb-6 grid gap-3 md:grid-cols-4">
+        <section className="mb-6 grid gap-3 grid-cols-2 md:grid-cols-4">
           <Card className="border border-[#d7ddd5] bg-white shadow-none">
             <CardBody className="gap-1 p-4">
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">fixed per day</p>
@@ -816,7 +816,8 @@ export default function HomePage() {
 
         <Card className="border border-[#d7ddd5] bg-white shadow-none">
           <CardBody className="p-0">
-            <div className="overflow-x-auto">
+            {/* Desktop Table View (Hidden on mobile) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full border-collapse">
                 <thead>
                   <tr className="border-b border-[#d7ddd5] bg-[#fbfbf9] text-left">
@@ -842,7 +843,6 @@ export default function HomePage() {
                         <td className="px-4 py-4 text-sm text-[#314238] align-top">
                           {hasPurchases ? (
                             <div>
-                              {/* Collapsed summary + toggle */}
                               <button
                                 type="button"
                                 onClick={() => toggleRowExpanded(row.date)}
@@ -908,6 +908,96 @@ export default function HomePage() {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card List View (Visible on mobile, hidden on desktop) */}
+            <div className="block md:hidden divide-y divide-[#eef1ec]">
+              {dailyRows.map((row) => {
+                const isExpanded = expandedRows.has(row.date);
+                const hasPurchases = row.purchases.length > 0;
+
+                return (
+                  <div key={row.date} className="p-4 space-y-3">
+                    {/* Header: Date & Total */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-[#314238]">{formatDateLabel(row.date)}</span>
+                      <span className="text-base font-bold text-[#1b2a21]">{formatCurrency(row.total)}</span>
+                    </div>
+
+                    {/* Cost breakdown */}
+                    <div className="flex gap-4 text-xs text-[#5c6a62]">
+                      <div>
+                        <span className="text-[10px] uppercase tracking-wider text-[#95a099] mr-1">Fixed:</span>
+                        <span className="font-semibold text-[#314238]">{formatCurrency(row.fixedCost)}</span>
+                      </div>
+                      {row.variableCost > 0 && (
+                        <div>
+                          <span className="text-[10px] uppercase tracking-wider text-[#95a099] mr-1">Extras:</span>
+                          <span className="font-semibold text-[#314238]">{formatCurrency(row.variableCost)}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* What you bought */}
+                    {hasPurchases && (
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={() => toggleRowExpanded(row.date)}
+                          className="flex items-center gap-1.5 text-left text-xs font-semibold text-[#314238] hover:text-[#1f3a2b] transition-colors w-full"
+                        >
+                          <svg
+                            className={`w-3.5 h-3.5 shrink-0 text-[#5c6a62] transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                          </svg>
+                          <span>
+                            {row.purchases.length === 1
+                              ? row.purchases[0].item
+                              : `${row.purchases.length} items`}
+                          </span>
+                        </button>
+
+                        {isExpanded && (
+                          <div className="mt-2 ml-4 space-y-1.5 animate-[fadeIn_150ms_ease-in]">
+                            {row.purchases.map((purchase) => (
+                              <div
+                                key={purchase.id}
+                                className="flex items-center justify-between gap-3 rounded-lg bg-[#f7f7f4] px-3 py-2"
+                              >
+                                <span className="text-[#314238] text-xs font-medium min-w-0 truncate">{purchase.item}</span>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="text-[11px] text-[#5c6a62] whitespace-nowrap">{formatCurrency(purchase.total)}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => deletePurchase(purchase.id)}
+                                    className="p-1 text-[#5c6a62]/60 hover:text-red-500 rounded-md transition-colors"
+                                    title="Remove this entry"
+                                  >
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                            {row.purchases.length > 1 && (
+                              <div className="flex items-center justify-between px-3 py-1.5 border-t border-[#d7ddd5] mt-1 pt-1.5">
+                                <span className="text-[10px] font-bold text-[#314238]">Total</span>
+                                <span className="text-[10px] font-bold text-[#314238]">{formatCurrency(row.variableCost)}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </CardBody>
         </Card>
