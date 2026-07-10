@@ -1,20 +1,5 @@
 import { NextResponse } from "next/server";
-
-// Polyfill DOMMatrix and Path2D globally before dynamically importing pdfjs-dist
-if (typeof global !== "undefined") {
-  if (!("DOMMatrix" in global)) {
-    // @ts-expect-error - DOMMatrix doesn't exist on NodeJS global type
-    global.DOMMatrix = class DOMMatrix {
-      constructor() {}
-    };
-  }
-  if (!("Path2D" in global)) {
-    // @ts-expect-error - Path2D doesn't exist on NodeJS global type
-    global.Path2D = class Path2D {
-      constructor() {}
-    };
-  }
-}
+import { extractText, getDocumentProxy } from "unpdf";
 
 function titleCase(value: string): string {
   return value
@@ -35,28 +20,8 @@ export async function POST(request: Request) {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-
-    // Dynamically import to ensure polyfills are defined beforehand
-    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-
-    const loadingTask = pdfjs.getDocument({
-      data: new Uint8Array(arrayBuffer),
-      useSystemFonts: true,
-      disableFontFace: true,
-    });
-
-    const pdfDoc = await loadingTask.promise;
-    const numPages = pdfDoc.numPages;
-    const pageTexts: string[] = [];
-
-    for (let i = 1; i <= numPages; i++) {
-      const page = await pdfDoc.getPage(i);
-      const textContent = await page.getTextContent();
-      const items = textContent.items.map((item: unknown) => (item as { str: string }).str);
-      pageTexts.push(items.join(" "));
-    }
-
-    const rawText = pageTexts.join(" ");
+    const pdf = await getDocumentProxy(new Uint8Array(arrayBuffer));
+    const { text: rawText } = await extractText(pdf, { mergePages: true });
     const text = rawText.split(/\s+/).join(" ");
 
     const dateMatch = text.match(/Invoice Date\s*:?\s*(\d{2}-\d{2}-\d{4})/i);
@@ -114,8 +79,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json(itemsList);
   } catch (error) {
+    console.error("parse-invoice error:", error);
     const message = error instanceof Error ? error.message : "could not parse invoice";
     return NextResponse.json({ error: message }, { status: 422 });
   }
 }
-
