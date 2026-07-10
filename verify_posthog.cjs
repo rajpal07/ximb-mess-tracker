@@ -8,6 +8,7 @@ const puppeteer = require('puppeteer');
 
   page.on('request', request => {
     const url = request.url();
+    console.log('REQUEST:', url);
     if (url.includes('posthog') && (url.includes('/e/') || url.includes('/capture'))) {
       const postData = request.postData();
       if (postData) {
@@ -33,6 +34,8 @@ const puppeteer = require('puppeteer');
       }
     }
   });
+
+  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
 
   console.log('Navigating to site...');
   await page.goto('https://ximb-mess-tracker.vercel.app', { waitUntil: 'networkidle2' });
