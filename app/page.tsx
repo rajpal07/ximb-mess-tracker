@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { Button, Card, CardBody, Input } from "@heroui/react";
+import { Button, Input } from "@heroui/react";
 import { supabase } from "@/app/utils/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 
@@ -42,8 +42,15 @@ function formatCurrency(value: number) {
   return currency.format(value);
 }
 
+function toLocalDateKey(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 function getTodayMonthKey() {
-  return new Date().toISOString().slice(0, 7);
+  return toLocalDateKey(new Date()).slice(0, 7);
 }
 
 function getMonthLabel(monthKey: string) {
@@ -69,7 +76,7 @@ function getVisibleDates(monthKey: string, messStartDate: string) {
 
   const dates: string[] = [];
   for (let day = firstDay; day <= end.getDate(); day += 1) {
-    dates.push(new Date(year, month - 1, day).toISOString().slice(0, 10));
+    dates.push(toLocalDateKey(new Date(year, month - 1, day)));
   }
 
   return dates;
@@ -108,7 +115,7 @@ export default function HomePage() {
 
   const [purchaseRecords, setPurchaseRecords] = useState<PurchaseRecord[]>([]);
   const [isImporting, setIsImporting] = useState(false);
-  const [importMessage, setImportMessage] = useState("upload invoice PDFs");
+  const [importMessage, setImportMessage] = useState("drop your Shirdi Sai PDFs");
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [manualEntry, setManualEntry] = useState({
     date: `${selectedMonth}-01`,
@@ -279,6 +286,8 @@ export default function HomePage() {
     };
   }, [dailyRows, selectedMonth, settings.advanceByMonth, settings.customTotalByMonth]);
 
+  const todayKey = toLocalDateKey(new Date());
+
   async function handleGoogleLogin() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -390,6 +399,9 @@ export default function HomePage() {
 
   async function clearMonth() {
     if (!user) return;
+    if (!window.confirm(`Delete all extras logged for ${getMonthLabel(selectedMonth)}? This can't be undone.`)) {
+      return;
+    }
     try {
       const startDate = `${selectedMonth}-01`;
       const endDate = new Date(
@@ -419,6 +431,9 @@ export default function HomePage() {
 
   async function clearAll() {
     if (!user) return;
+    if (!window.confirm("Delete every logged extra, across all months? This can't be undone.")) {
+      return;
+    }
     try {
       const { error } = await supabase
         .from("purchases")
@@ -445,7 +460,6 @@ export default function HomePage() {
       return;
     }
 
-    const tempId = `manual-${manualEntry.date}-${item}-${total}-${Date.now()}`;
     const newRecord = {
       date: manualEntry.date,
       item,
@@ -509,13 +523,20 @@ export default function HomePage() {
     });
   }
 
+  const inputClassNames = {
+    inputWrapper:
+      "border border-[#d9d1bc] bg-[#fdfbf5] shadow-none data-[hover=true]:border-[#b9ae90] group-data-[focus=true]:border-[#e08a2e]",
+    label: "text-[#5c6a54] text-xs",
+    input: "text-[#1f2a1c] font-medium",
+  };
+
   // --- Render Auth Loading Spinner ---
   if (authLoading && !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f7f7f4]">
+      <div className="paper-bg flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1f3a2b] border-t-transparent"></div>
-          <p className="font-[family-name:var(--font-manrope)] text-sm text-[#5c6a62]">connecting to secure space...</p>
+          <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-[#2a4a2e] border-t-transparent"></div>
+          <p className="font-[family-name:var(--font-manrope)] text-sm text-[#5c6a54]">opening your ledger…</p>
         </div>
       </div>
     );
@@ -524,485 +545,533 @@ export default function HomePage() {
   // --- Render Login Screen if not Authenticated ---
   if (!user) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f7f4] font-[family-name:var(--font-manrope)] text-[#1b2a21] px-4">
-        <div className="w-full max-w-md border border-[#d7ddd5] bg-white p-8 rounded-3xl shadow-sm space-y-6">
-          <div className="space-y-2 text-center">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">ximb mess tracker</p>
-            <h1 className="text-3xl font-semibold tracking-[-0.03em]">daily mess spend</h1>
-            <p className="text-sm text-[#5c6a62]">
-              sign in with your Google account to log spends, upload invoices, and sync data securely.
+      <main className="paper-bg flex min-h-screen items-center justify-center px-4 font-[family-name:var(--font-manrope)] text-[#1f2a1c]">
+        <div className="ledger-card receipt-edge w-full max-w-md p-8 sm:p-10">
+          <div className="rise space-y-6" style={{ animationDelay: "60ms" }}>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#5c6a54]">
+                ximb mess tracker
+              </p>
+              <span className="num text-[11px] uppercase tracking-wider text-[#8a987e]">shirdi sai canteen</span>
+            </div>
+
+            <div className="rule-dashed" />
+
+            <div className="space-y-3">
+              <h1 className="font-[family-name:var(--font-bricolage)] text-[2.6rem] font-bold leading-[1.05] tracking-tight">
+                your mess P&amp;L,
+                <br />
+                <span className="text-[#2a4a2e]">sorted.</span>
+              </h1>
+              <p className="text-sm leading-relaxed text-[#5c6a54]">
+                ₹222 a day at Shirdi Sai Canteen, plus every &ldquo;just one
+                lassi&rdquo; on top. upload the invoice PDFs — the math runs
+                itself, and month-end stops being a plot twist.
+              </p>
+            </div>
+
+            <Button
+              onPress={handleGoogleLogin}
+              className="w-full bg-[#16321e] py-6 text-[15px] font-semibold text-white transition-transform hover:bg-[#2a4a2e] active:scale-[0.99]"
+              radius="full"
+              size="lg"
+            >
+              <svg className="mr-1 h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+              </svg>
+              Sign in with Google
+            </Button>
+
+            <p className="text-center text-[11px] text-[#8a987e]">
+              your data stays yours. we just run the numbers.
             </p>
           </div>
-
-          <Button
-            onPress={handleGoogleLogin}
-            className="w-full bg-[#1f3a2b] text-white hover:bg-[#15271d] py-6 font-semibold flex items-center justify-center transition-colors gap-2"
-            radius="full"
-            size="lg"
-          >
-            <svg className="w-5 h-5 mr-1" viewBox="0 0 24 24">
-              <path
-                fill="#ffffff"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#ffffff"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#ffffff"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-              />
-              <path
-                fill="#ffffff"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-              />
-            </svg>
-            Sign in with Google
-          </Button>
-
-          <p className="text-[10px] text-center text-[#95a099]">
-            your data is synced to database securely.
-          </p>
         </div>
       </main>
     );
   }
 
   // --- Render Dashboard if Authenticated ---
+  const daysCounted = dailyRows.length;
+  const avgPerDay = daysCounted > 0 ? Math.round(summary.grandTotal / daysCounted) : 0;
+
   return (
-    <main className="min-h-screen bg-[#f7f7f4] font-[family-name:var(--font-manrope)] text-[#1b2a21]">
-      <div className="mx-auto max-w-5xl px-4 py-6 md:px-8 md:py-10">
-        
-        {/* User Info Bar */}
-        <div className="mb-4 flex items-center justify-between rounded-full border border-[#d7ddd5] bg-white px-4 py-2 text-xs text-[#5c6a62]">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-            <span>logged in as <span className="font-semibold text-[#314238]">{user.email}</span></span>
-          </div>
-          <Button
-            size="sm"
-            variant="light"
-            className="text-[#e23b3b] font-medium h-7 px-3 min-w-0 hover:bg-red-50"
-            radius="full"
-            onPress={() => supabase.auth.signOut()}
-          >
-            Sign Out
-          </Button>
-        </div>
+    <main className="paper-bg min-h-screen font-[family-name:var(--font-manrope)] text-[#1f2a1c]">
+      <div className="mx-auto max-w-5xl px-4 pb-28 pt-5 md:px-8 md:pb-12 md:pt-8">
 
-        <div className="mb-6 flex flex-col gap-5 border-b border-[#d7ddd5] pb-6 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">ximb mess tracker</p>
-            <h1 className="text-3xl font-semibold tracking-[-0.03em] md:text-4xl">daily mess spend</h1>
-            <p className="text-sm text-[#5c6a62]">{getMonthLabel(selectedMonth)}</p>
-          </div>
-
-          <div className="flex flex-col gap-3 md:items-end">
-            <label
-              htmlFor="invoice-upload"
-              className="flex cursor-pointer items-center gap-3 rounded-full border border-[#d7ddd5] bg-white px-4 py-3 text-sm text-[#314238] transition hover:border-[#adb8b0]"
-            >
-              <span>{importMessage}</span>
-              <input
-                id="invoice-upload"
-                type="file"
-                accept="application/pdf"
-                multiple
-                className="hidden"
-                onChange={handleUpload}
-              />
-              <Button
-                as="span"
-                className="bg-[#1f3a2b] px-4 text-white shadow-none"
-                isLoading={isImporting}
-                radius="full"
-                size="sm"
-              >
-                upload
-              </Button>
-            </label>
-
-            <div className="flex flex-wrap gap-2">
-              <Input
-                type="month"
-                value={selectedMonth}
-                onValueChange={setSelectedMonth}
-                aria-label="month"
-                className="max-w-[180px]"
-                classNames={{
-                  inputWrapper: "border border-[#d7ddd5] bg-white shadow-none",
-                  input: "text-[#1b2a21]",
-                }}
-              />
-              <Button variant="flat" radius="full" className="bg-white text-[#314238]" onPress={clearMonth}>
-                clear month
-              </Button>
-              <Button variant="flat" radius="full" className="bg-[#1f3a2b] text-white" onPress={clearAll}>
-                clear all
-              </Button>
+        {/* Masthead */}
+        <header className="rise mb-5" style={{ animationDelay: "0ms" }}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs text-[#5c6a54]">
+              <span className="h-2 w-2 rounded-full bg-[#4c8a3f]" aria-hidden="true"></span>
+              <span className="truncate">
+                <span className="hidden sm:inline">logged in as </span>
+                <span className="font-semibold text-[#1f2a1c]">{user.email}</span>
+              </span>
             </div>
+            <Button
+              size="sm"
+              variant="light"
+              className="h-7 min-w-0 px-3 font-medium text-[#c94f36] hover:bg-[#c94f36]/10"
+              radius="full"
+              onPress={() => supabase.auth.signOut()}
+            >
+              Sign Out
+            </Button>
           </div>
-        </div>
 
-        <section className="mb-6 grid gap-3 grid-cols-2 md:grid-cols-4">
-          <Card className="border border-[#d7ddd5] bg-white shadow-none">
-            <CardBody className="gap-1 p-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">fixed per day</p>
-              <p className="text-2xl font-semibold">{formatCurrency(DAILY_FIXED_COST)}</p>
-            </CardBody>
-          </Card>
-          <Card className="border border-[#d7ddd5] bg-white shadow-none">
-            <CardBody className="gap-1 p-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">extras total</p>
-              <p className="text-2xl font-semibold">{formatCurrency(summary.variableTotal)}</p>
-            </CardBody>
-          </Card>
-          <Card className="border border-[#d7ddd5] bg-white shadow-none">
-            <CardBody className="gap-1 p-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">month total</p>
-              <p className="text-2xl font-semibold">{formatCurrency(summary.grandTotal)}</p>
-              {summary.customMonthTotal > 0 ? (
-                <p className="text-xs text-[#5c6a62]">using custom month total</p>
-              ) : null}
-            </CardBody>
-          </Card>
-          <Card className="border border-[#d7ddd5] bg-white shadow-none">
-            <CardBody className="gap-1 p-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">payable this month</p>
-              <p className="text-2xl font-semibold">{formatCurrency(summary.payableTotal)}</p>
-              <p className="text-xs text-[#5c6a62]">advance: {formatCurrency(summary.advanceCredit)}</p>
-            </CardBody>
-          </Card>
-        </section>
-
-        <section className="mb-6 grid gap-3 md:grid-cols-3">
-          <Card className="border border-[#d7ddd5] bg-white shadow-none">
-            <CardBody className="gap-3 p-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">mess setup</p>
-              <Input
-                type="date"
-                value={settings.messStartDate}
-                onValueChange={(value) =>
-                  setSettings((current) => ({
-                    ...current,
-                    messStartDate: value || DEFAULT_MESS_START_DATE,
-                  }))
-                }
-                label="mess start date"
-                labelPlacement="outside"
-                classNames={{
-                  inputWrapper: "border border-[#d7ddd5] bg-white shadow-none",
-                  label: "text-[#5c6a62]",
-                  input: "text-[#1b2a21]",
-                }}
-              />
-              <p className="text-xs text-[#5c6a62]">
-                use this if mess started mid-month, like `15 june`.
+          <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#5c6a54]">
+                ximb · shirdi sai canteen
               </p>
-            </CardBody>
-          </Card>
-
-          <Card className="border border-[#d7ddd5] bg-white shadow-none">
-            <CardBody className="gap-3 p-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">custom month total</p>
-              <Input
-                type="number"
-                value={String(settings.customTotalByMonth[selectedMonth] ?? 0)}
-                onValueChange={(value) =>
-                  setSettings((current) => ({
-                    ...current,
-                    customTotalByMonth: {
-                      ...current.customTotalByMonth,
-                      [selectedMonth]: Number.parseInt(value || "0", 10) || 0,
-                    },
-                  }))
-                }
-                label="saved total for this month"
-                labelPlacement="outside"
-                endContent={<span className="text-xs text-[#5c6a62]">optional</span>}
-                classNames={{
-                  inputWrapper: "border border-[#d7ddd5] bg-white shadow-none",
-                  label: "text-[#5c6a62]",
-                  input: "text-[#1b2a21]",
-                }}
-              />
-              <p className="text-xs text-[#5c6a62]">
-                example: set june to `4200` if you only want to track the final amount.
+              <h1 className="mt-1 font-[family-name:var(--font-bricolage)] text-4xl font-bold tracking-tight md:text-5xl">
+                mess ledger
+              </h1>
+              <p className="mt-1 font-[family-name:var(--font-instrument-serif)] text-lg italic text-[#5c6a54]">
+                {getMonthLabel(selectedMonth)} · {daysCounted} day{daysCounted === 1 ? "" : "s"} counted
               </p>
-            </CardBody>
-          </Card>
+            </div>
 
-          <Card className="border border-[#d7ddd5] bg-white shadow-none">
-            <CardBody className="gap-3 p-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">advance</p>
-              <Input
-                type="number"
-                value={String(settings.advanceByMonth[selectedMonth] ?? 0)}
-                onValueChange={(value) =>
-                  setSettings((current) => ({
-                    ...current,
-                    advanceByMonth: {
-                      ...current.advanceByMonth,
-                      [selectedMonth]: Number.parseInt(value || "0", 10) || 0,
-                    },
-                  }))
-                }
-                label="advance credit for this month"
-                labelPlacement="outside"
-                endContent={<span className="text-xs text-[#5c6a62]">optional</span>}
-                classNames={{
-                  inputWrapper: "border border-[#d7ddd5] bg-white shadow-none",
-                  label: "text-[#5c6a62]",
-                  input: "text-[#1b2a21]",
-                }}
-              />
-              <p className="text-xs text-[#5c6a62]">
-                june can stay `0`. from july to september, enter `3000` or any custom amount.
-              </p>
-            </CardBody>
-          </Card>
-        </section>
+            <div className="flex flex-col gap-2.5 md:items-end">
+              <label
+                htmlFor="invoice-upload"
+                className="group flex cursor-pointer items-center justify-between gap-3 rounded-full border border-dashed border-[#b9ae90] bg-[#fdfbf5] py-1.5 pl-4 pr-1.5 text-sm text-[#1f2a1c] transition-colors hover:border-[#e08a2e]"
+              >
+                <span className="truncate text-[13px] text-[#5c6a54]">{importMessage}</span>
+                <input
+                  id="invoice-upload"
+                  type="file"
+                  accept="application/pdf"
+                  multiple
+                  className="hidden"
+                  onChange={handleUpload}
+                />
+                <Button
+                  as="span"
+                  className="bg-[#16321e] px-4 text-white shadow-none group-hover:bg-[#2a4a2e]"
+                  isLoading={isImporting}
+                  radius="full"
+                  size="sm"
+                >
+                  upload
+                </Button>
+              </label>
 
-        <section className="mb-6">
-          <Card className="border border-[#d7ddd5] bg-white shadow-none">
-            <CardBody className="gap-3 p-4">
-              <div className="space-y-1">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">manual entry</p>
-                <p className="text-sm text-[#5c6a62]">
-                  use this for june or any older month when you want to add something by hand.
-                </p>
-              </div>
-
-              <div className="grid gap-3 md:grid-cols-[160px_1fr_140px_auto]">
+              <div className="flex flex-wrap items-center gap-2">
                 <Input
-                  type="date"
-                  value={manualEntry.date}
-                  onValueChange={(value) => setManualEntry((current) => ({ ...current, date: value }))}
-                  aria-label="entry date"
-                  classNames={{
-                    inputWrapper: "border border-[#d7ddd5] bg-white shadow-none",
-                    input: "text-[#1b2a21]",
-                  }}
+                  type="month"
+                  value={selectedMonth}
+                  onValueChange={setSelectedMonth}
+                  aria-label="month"
+                  className="max-w-[170px]"
+                  size="sm"
+                  classNames={inputClassNames}
                 />
-                <Input
-                  value={manualEntry.item}
-                  onValueChange={(value) => setManualEntry((current) => ({ ...current, item: value }))}
-                  placeholder="what you bought or note"
-                  aria-label="entry item"
-                  classNames={{
-                    inputWrapper: "border border-[#d7ddd5] bg-white shadow-none",
-                    input: "text-[#1b2a21]",
-                  }}
-                />
-                <Input
-                  type="number"
-                  value={manualEntry.total}
-                  onValueChange={(value) => setManualEntry((current) => ({ ...current, total: value }))}
-                  placeholder="amount"
-                  aria-label="entry amount"
-                  classNames={{
-                    inputWrapper: "border border-[#d7ddd5] bg-white shadow-none",
-                    input: "text-[#1b2a21]",
-                  }}
-                />
-                <Button className="bg-[#1f3a2b] text-white shadow-none" radius="full" onPress={addManualEntry}>
-                  add entry
+                <Button
+                  variant="flat"
+                  radius="full"
+                  size="sm"
+                  className="border border-[#d9d1bc] bg-[#fdfbf5] text-[#5c6a54] hover:text-[#c94f36]"
+                  onPress={clearMonth}
+                >
+                  clear month
+                </Button>
+                <Button
+                  variant="flat"
+                  radius="full"
+                  size="sm"
+                  className="border border-[#d9d1bc] bg-[#fdfbf5] text-[#5c6a54] hover:text-[#c94f36]"
+                  onPress={clearAll}
+                >
+                  clear all
                 </Button>
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
+        </header>
+
+        {/* Summary tickets */}
+        <section className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {[
+            { label: "fixed per day", value: formatCurrency(DAILY_FIXED_COST), sub: "the non-negotiable", delay: 80 },
+            {
+              label: "extras total",
+              value: formatCurrency(summary.variableTotal),
+              sub:
+                filteredPurchases.length > 0
+                  ? `${filteredPurchases.length} moment${filteredPurchases.length === 1 ? "" : "s"} of weakness`
+                  : "none yet. iron discipline.",
+              delay: 140,
+            },
+            {
+              label: "month total",
+              value: formatCurrency(summary.grandTotal),
+              sub: summary.customMonthTotal > 0 ? "using custom month total" : `burn rate ≈ ${formatCurrency(avgPerDay)}/day`,
+              delay: 200,
+            },
+          ].map((card) => (
+            <div key={card.label} className="ledger-card rise p-4" style={{ animationDelay: `${card.delay}ms` }}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">{card.label}</p>
+              <p key={card.value} className="num ticker-pop mt-1.5 text-2xl font-semibold md:text-[1.7rem]">{card.value}</p>
+              <p className="mt-0.5 truncate text-[11px] text-[#8a987e]">{card.sub}</p>
+            </div>
+          ))}
+
+          {/* payable — the hero ticket */}
+          <div className="ledger-card receipt-edge rise relative overflow-hidden !border-[#16321e] !bg-[#16321e] p-4 text-[#f4efe4]" style={{ animationDelay: "260ms" }}>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#a8bd9c]">payable this month</p>
+            <p key={summary.payableTotal} className="num ticker-pop mt-1.5 text-2xl font-semibold text-white md:text-[1.7rem]">
+              {formatCurrency(summary.payableTotal)}
+            </p>
+            <p className="mt-0.5 text-[11px] text-[#a8bd9c]">advance: {formatCurrency(summary.advanceCredit)}</p>
+            {summary.payableTotal === 0 && (
+              <span className="stamp num absolute right-3 top-3 rounded border-2 border-[#e08a2e] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[#e08a2e]">
+                paid up
+              </span>
+            )}
+          </div>
         </section>
 
-        <Card className="border border-[#d7ddd5] bg-white shadow-none">
-          <CardBody className="p-0">
-            {/* Desktop Table View (Hidden on mobile) */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="min-w-full border-collapse">
-                <thead>
-                  <tr className="border-b border-[#d7ddd5] bg-[#fbfbf9] text-left">
-                    <th className="px-4 py-3 text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">date</th>
-                    <th className="px-4 py-3 text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">fixed</th>
-                    <th className="px-4 py-3 text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">variable</th>
-                    <th className="px-4 py-3 text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">what you bought</th>
-                    <th className="px-4 py-3 text-right text-[11px] uppercase tracking-[0.2em] text-[#5c6a62]">total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dailyRows.map((row) => {
-                    const isExpanded = expandedRows.has(row.date);
-                    const hasPurchases = row.purchases.length > 0;
+        {/* Settings row */}
+        <section className="rise mb-5 grid gap-3 md:grid-cols-3" style={{ animationDelay: "320ms" }}>
+          <div className="ledger-card space-y-3 p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">mess setup</p>
+            <Input
+              type="date"
+              value={settings.messStartDate}
+              onValueChange={(value) =>
+                setSettings((current) => ({
+                  ...current,
+                  messStartDate: value || DEFAULT_MESS_START_DATE,
+                }))
+              }
+              label="mess start date"
+              labelPlacement="outside"
+              classNames={inputClassNames}
+            />
+            <p className="text-xs leading-relaxed text-[#8a987e]">
+              set this if the mess started mid-month, like 15 june.
+            </p>
+          </div>
 
-                    return (
-                      <tr key={row.date} className="border-b border-[#eef1ec] last:border-b-0 group">
-                        <td className="px-4 py-4 text-sm text-[#314238] align-top">{formatDateLabel(row.date)}</td>
-                        <td className="px-4 py-4 text-base font-medium align-top">{formatCurrency(row.fixedCost)}</td>
-                        <td className="px-4 py-4 text-base font-medium align-top">
-                          {row.variableCost > 0 ? formatCurrency(row.variableCost) : "-"}
-                        </td>
-                        <td className="px-4 py-4 text-sm text-[#314238] align-top">
-                          {hasPurchases ? (
-                            <div>
-                              <button
-                                type="button"
-                                onClick={() => toggleRowExpanded(row.date)}
-                                className="flex items-center gap-1.5 text-left hover:text-[#1f3a2b] transition-colors w-full"
-                              >
-                                <svg
-                                  className={`w-3.5 h-3.5 shrink-0 text-[#5c6a62] transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  strokeWidth={2.5}
-                                >
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                </svg>
-                                <span className="truncate">
-                                  {row.purchases.length === 1
-                                    ? row.purchases[0].item
-                                    : `${row.purchases.length} items`}
-                                </span>
-                              </button>
+          <div className="ledger-card space-y-3 p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">custom month total</p>
+            <Input
+              type="number"
+              value={String(settings.customTotalByMonth[selectedMonth] ?? 0)}
+              onValueChange={(value) =>
+                setSettings((current) => ({
+                  ...current,
+                  customTotalByMonth: {
+                    ...current.customTotalByMonth,
+                    [selectedMonth]: Number.parseInt(value || "0", 10) || 0,
+                  },
+                }))
+              }
+              label="saved total for this month"
+              labelPlacement="outside"
+              endContent={<span className="text-xs text-[#8a987e]">optional</span>}
+              classNames={inputClassNames}
+            />
+            <p className="text-xs leading-relaxed text-[#8a987e]">
+              overrides the computed total — e.g. set 4200 if you only care about the final amount.
+            </p>
+          </div>
 
-                              {isExpanded && (
-                                <div className="mt-2 ml-5 space-y-1.5 animate-[fadeIn_150ms_ease-in]">
-                                  {row.purchases.map((purchase) => (
-                                    <div
-                                      key={purchase.id}
-                                      className="flex items-center justify-between gap-3 rounded-lg bg-[#f7f7f4] px-3 py-2 group/item"
-                                    >
-                                      <div className="flex-1 min-w-0">
-                                        <span className="text-[#314238] text-sm">{purchase.item}</span>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-xs text-[#5c6a62] whitespace-nowrap">{formatCurrency(purchase.total)}</span>
-                                        <button
-                                          type="button"
-                                          onClick={() => deletePurchase(purchase.id)}
-                                          className="shrink-0 rounded-md p-1 text-[#5c6a62]/40 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover/item:opacity-100 focus:opacity-100"
-                                          title="Remove this entry"
-                                        >
-                                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                          </svg>
-                                        </button>
-                                      </div>
-                                    </div>
-                                  ))}
-                                  {row.purchases.length > 1 && (
-                                    <div className="flex items-center justify-between px-3 py-1.5 border-t border-[#d7ddd5] mt-1 pt-2">
-                                      <span className="text-xs font-semibold text-[#314238]">Total</span>
-                                      <span className="text-xs font-semibold text-[#314238]">{formatCurrency(row.variableCost)}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            "-"
-                          )}
-                        </td>
-                        <td className="px-4 py-4 text-right text-lg font-semibold align-top">{formatCurrency(row.total)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          <div className="ledger-card space-y-3 p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">advance</p>
+            <Input
+              type="number"
+              value={String(settings.advanceByMonth[selectedMonth] ?? 0)}
+              onValueChange={(value) =>
+                setSettings((current) => ({
+                  ...current,
+                  advanceByMonth: {
+                    ...current.advanceByMonth,
+                    [selectedMonth]: Number.parseInt(value || "0", 10) || 0,
+                  },
+                }))
+              }
+              label="advance credit for this month"
+              labelPlacement="outside"
+              endContent={<span className="text-xs text-[#8a987e]">optional</span>}
+              classNames={inputClassNames}
+            />
+            <p className="text-xs leading-relaxed text-[#8a987e]">
+              already paid a deposit? it gets subtracted from the payable amount.
+            </p>
+          </div>
+        </section>
+
+        {/* Manual entry */}
+        <section className="rise mb-5" style={{ animationDelay: "380ms" }}>
+          <div className="ledger-card space-y-3 p-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">add an extra by hand</p>
+              <p className="text-xs text-[#8a987e]">no invoice? the 2 a.m. maggi still counts.</p>
             </div>
 
-            {/* Mobile Card List View (Visible on mobile, hidden on desktop) */}
-            <div className="block md:hidden divide-y divide-[#eef1ec]">
-              {dailyRows.map((row) => {
-                const isExpanded = expandedRows.has(row.date);
-                const hasPurchases = row.purchases.length > 0;
+            <div className="grid gap-2.5 md:grid-cols-[160px_1fr_140px_auto]">
+              <Input
+                type="date"
+                value={manualEntry.date}
+                onValueChange={(value) => setManualEntry((current) => ({ ...current, date: value }))}
+                aria-label="entry date"
+                classNames={inputClassNames}
+              />
+              <Input
+                value={manualEntry.item}
+                onValueChange={(value) => setManualEntry((current) => ({ ...current, item: value }))}
+                placeholder="what you bought"
+                aria-label="entry item"
+                classNames={inputClassNames}
+              />
+              <Input
+                type="number"
+                value={manualEntry.total}
+                onValueChange={(value) => setManualEntry((current) => ({ ...current, total: value }))}
+                placeholder="amount ₹"
+                aria-label="entry amount"
+                classNames={inputClassNames}
+              />
+              <Button
+                className="bg-[#16321e] font-semibold text-white shadow-none hover:bg-[#2a4a2e]"
+                radius="full"
+                onPress={addManualEntry}
+              >
+                add entry
+              </Button>
+            </div>
+          </div>
+        </section>
 
-                return (
-                  <div key={row.date} className="p-4 space-y-3">
-                    {/* Header: Date & Total */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-[#314238]">{formatDateLabel(row.date)}</span>
-                      <span className="text-base font-bold text-[#1b2a21]">{formatCurrency(row.total)}</span>
-                    </div>
+        {/* Daily ledger */}
+        <div className="ledger-card rise overflow-hidden" style={{ animationDelay: "440ms" }}>
+          {/* Desktop table */}
+          <div className="hidden overflow-x-auto md:block">
+            <table className="min-w-full border-collapse">
+              <thead>
+                <tr className="border-b border-[#d9d1bc] bg-[#f4efe4]/60 text-left">
+                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">date</th>
+                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">fixed</th>
+                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">extras</th>
+                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">what you bought</th>
+                  <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dailyRows.map((row) => {
+                  const isExpanded = expandedRows.has(row.date);
+                  const hasPurchases = row.purchases.length > 0;
+                  const isToday = row.date === todayKey;
 
-                    {/* Cost breakdown */}
-                    <div className="flex gap-4 text-xs text-[#5c6a62]">
-                      <div>
-                        <span className="text-[10px] uppercase tracking-wider text-[#95a099] mr-1">Fixed:</span>
-                        <span className="font-semibold text-[#314238]">{formatCurrency(row.fixedCost)}</span>
-                      </div>
-                      {row.variableCost > 0 && (
-                        <div>
-                          <span className="text-[10px] uppercase tracking-wider text-[#95a099] mr-1">Extras:</span>
-                          <span className="font-semibold text-[#314238]">{formatCurrency(row.variableCost)}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* What you bought */}
-                    {hasPurchases && (
-                      <div className="pt-1">
-                        <button
-                          type="button"
-                          onClick={() => toggleRowExpanded(row.date)}
-                          className="flex items-center gap-1.5 text-left text-xs font-semibold text-[#314238] hover:text-[#1f3a2b] transition-colors w-full"
-                        >
-                          <svg
-                            className={`w-3.5 h-3.5 shrink-0 text-[#5c6a62] transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2.5}
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                          </svg>
-                          <span>
-                            {row.purchases.length === 1
-                              ? row.purchases[0].item
-                              : `${row.purchases.length} items`}
+                  return (
+                    <tr
+                      key={row.date}
+                      className={`border-b border-[#e7e0cd] transition-colors last:border-b-0 hover:bg-[#f4efe4]/50 ${isToday ? "today-row" : ""}`}
+                    >
+                      <td className="px-4 py-3.5 align-top text-sm text-[#1f2a1c]">
+                        <span className="font-medium">{formatDateLabel(row.date)}</span>
+                        {isToday && (
+                          <span className="ml-2 rounded-full bg-[#e08a2e]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#b05f0a]">
+                            today
                           </span>
-                        </button>
-
-                        {isExpanded && (
-                          <div className="mt-2 ml-4 space-y-1.5 animate-[fadeIn_150ms_ease-in]">
-                            {row.purchases.map((purchase) => (
-                              <div
-                                key={purchase.id}
-                                className="flex items-center justify-between gap-3 rounded-lg bg-[#f7f7f4] px-3 py-2"
+                        )}
+                      </td>
+                      <td className="num px-4 py-3.5 align-top text-[15px] text-[#5c6a54]">{formatCurrency(row.fixedCost)}</td>
+                      <td className="num px-4 py-3.5 align-top text-[15px] font-medium">
+                        {row.variableCost > 0 ? (
+                          <span className="text-[#b05f0a]">+{formatCurrency(row.variableCost)}</span>
+                        ) : (
+                          <span className="text-[#8a987e]">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5 align-top text-sm text-[#1f2a1c]">
+                        {hasPurchases ? (
+                          <div>
+                            <button
+                              type="button"
+                              onClick={() => toggleRowExpanded(row.date)}
+                              className="flex w-full items-center gap-1.5 text-left transition-colors hover:text-[#2a4a2e]"
+                              aria-expanded={isExpanded}
+                            >
+                              <svg
+                                className={`h-3.5 w-3.5 shrink-0 text-[#8a987e] transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2.5}
+                                aria-hidden="true"
                               >
-                                <span className="text-[#314238] text-xs font-medium min-w-0 truncate">{purchase.item}</span>
-                                <div className="flex items-center gap-2 shrink-0">
-                                  <span className="text-[11px] text-[#5c6a62] whitespace-nowrap">{formatCurrency(purchase.total)}</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => deletePurchase(purchase.id)}
-                                    className="p-1 text-[#5c6a62]/60 hover:text-red-500 rounded-md transition-colors"
-                                    title="Remove this entry"
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                              </svg>
+                              <span className="truncate">
+                                {row.purchases.length === 1
+                                  ? row.purchases[0].item
+                                  : `${row.purchases.length} items`}
+                              </span>
+                            </button>
+
+                            {isExpanded && (
+                              <div className="ml-5 mt-2 space-y-1.5 animate-[fadeIn_150ms_ease-in]">
+                                {row.purchases.map((purchase) => (
+                                  <div
+                                    key={purchase.id}
+                                    className="group/item flex items-center justify-between gap-3 rounded-lg bg-[#f4efe4] px-3 py-2"
                                   >
-                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                            {row.purchases.length > 1 && (
-                              <div className="flex items-center justify-between px-3 py-1.5 border-t border-[#d7ddd5] mt-1 pt-1.5">
-                                <span className="text-[10px] font-bold text-[#314238]">Total</span>
-                                <span className="text-[10px] font-bold text-[#314238]">{formatCurrency(row.variableCost)}</span>
+                                    <span className="min-w-0 flex-1 truncate text-sm text-[#1f2a1c]">{purchase.item}</span>
+                                    <div className="flex items-center gap-2">
+                                      <span className="num whitespace-nowrap text-xs text-[#5c6a54]">{formatCurrency(purchase.total)}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => deletePurchase(purchase.id)}
+                                        className="shrink-0 rounded-md p-1 text-[#8a987e]/50 opacity-0 transition-all hover:bg-[#c94f36]/10 hover:text-[#c94f36] focus:opacity-100 group-hover/item:opacity-100"
+                                        title="Remove this entry"
+                                      >
+                                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                                {row.purchases.length > 1 && (
+                                  <div className="mt-1 flex items-center justify-between border-t border-[#d9d1bc] px-3 pb-0.5 pt-2">
+                                    <span className="text-xs font-semibold text-[#1f2a1c]">Total</span>
+                                    <span className="num text-xs font-semibold text-[#1f2a1c]">{formatCurrency(row.variableCost)}</span>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
+                        ) : (
+                          <span className="text-[#8a987e]">—</span>
                         )}
+                      </td>
+                      <td className="num px-4 py-3.5 text-right align-top text-base font-semibold">{formatCurrency(row.total)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile card list */}
+          <div className="block divide-y divide-[#e7e0cd] md:hidden">
+            {dailyRows.map((row) => {
+              const isExpanded = expandedRows.has(row.date);
+              const hasPurchases = row.purchases.length > 0;
+              const isToday = row.date === todayKey;
+
+              return (
+                <div key={row.date} className={`space-y-2.5 p-4 ${isToday ? "today-row" : ""}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-[#1f2a1c]">
+                      {formatDateLabel(row.date)}
+                      {isToday && (
+                        <span className="ml-2 rounded-full bg-[#e08a2e]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#b05f0a]">
+                          today
+                        </span>
+                      )}
+                    </span>
+                    <span className="num text-base font-bold text-[#1f2a1c]">{formatCurrency(row.total)}</span>
+                  </div>
+
+                  <div className="flex gap-4 text-xs text-[#5c6a54]">
+                    <div>
+                      <span className="mr-1 text-[10px] uppercase tracking-wider text-[#8a987e]">Fixed:</span>
+                      <span className="num font-semibold text-[#5c6a54]">{formatCurrency(row.fixedCost)}</span>
+                    </div>
+                    {row.variableCost > 0 && (
+                      <div>
+                        <span className="mr-1 text-[10px] uppercase tracking-wider text-[#8a987e]">Extras:</span>
+                        <span className="num font-semibold text-[#b05f0a]">+{formatCurrency(row.variableCost)}</span>
                       </div>
                     )}
                   </div>
-                );
-              })}
-            </div>
-          </CardBody>
-        </Card>
+
+                  {hasPurchases && (
+                    <div className="pt-0.5">
+                      <button
+                        type="button"
+                        onClick={() => toggleRowExpanded(row.date)}
+                        className="flex w-full items-center gap-1.5 py-1 text-left text-xs font-semibold text-[#1f2a1c] transition-colors hover:text-[#2a4a2e]"
+                        aria-expanded={isExpanded}
+                      >
+                        <svg
+                          className={`h-3.5 w-3.5 shrink-0 text-[#8a987e] transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2.5}
+                          aria-hidden="true"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span>
+                          {row.purchases.length === 1
+                            ? row.purchases[0].item
+                            : `${row.purchases.length} items`}
+                        </span>
+                      </button>
+
+                      {isExpanded && (
+                        <div className="ml-4 mt-2 space-y-1.5 animate-[fadeIn_150ms_ease-in]">
+                          {row.purchases.map((purchase) => (
+                            <div
+                              key={purchase.id}
+                              className="flex items-center justify-between gap-3 rounded-lg bg-[#f4efe4] px-3 py-2"
+                            >
+                              <span className="min-w-0 truncate text-xs font-medium text-[#1f2a1c]">{purchase.item}</span>
+                              <div className="flex shrink-0 items-center gap-2">
+                                <span className="num whitespace-nowrap text-[11px] text-[#5c6a54]">{formatCurrency(purchase.total)}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => deletePurchase(purchase.id)}
+                                  className="rounded-md p-1.5 text-[#8a987e] transition-colors hover:text-[#c94f36]"
+                                  title="Remove this entry"
+                                >
+                                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                          {row.purchases.length > 1 && (
+                            <div className="mt-1 flex items-center justify-between border-t border-[#d9d1bc] px-3 pb-0.5 pt-1.5">
+                              <span className="text-[10px] font-bold text-[#1f2a1c]">Total</span>
+                              <span className="num text-[10px] font-bold text-[#1f2a1c]">{formatCurrency(row.variableCost)}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky payable bar — mobile only */}
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[#2a4a2e] bg-[#16321e] px-4 py-3 text-[#f4efe4] md:hidden" style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}>
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#a8bd9c]">payable · {getMonthLabel(selectedMonth)}</p>
+            <p className="num text-xl font-bold text-white">{formatCurrency(summary.payableTotal)}</p>
+          </div>
+          <div className="text-right text-[11px] leading-tight text-[#a8bd9c]">
+            <p>total {formatCurrency(summary.grandTotal)}</p>
+            <p>advance −{formatCurrency(summary.advanceCredit)}</p>
+          </div>
+        </div>
       </div>
     </main>
   );
 }
-
