@@ -21,7 +21,6 @@
     "next": "16.1.6",
     "pdfjs-dist": "^6.1.200",
     "posthog-js": "^1.360.1",
-    "puppeteer": "^25.3.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "unpdf": "^1.6.2"

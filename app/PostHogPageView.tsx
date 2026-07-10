@@ -18,6 +18,12 @@ function PostHogPageViewInner() {
       posthog.capture("$pageview", {
         $current_url: url,
       });
+
+      return () => {
+        posthog.capture("$pageleave", {
+          $current_url: url,
+        });
+      };
     }
   }, [pathname, searchParams, posthog]);
 

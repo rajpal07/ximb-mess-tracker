@@ -6,11 +6,11 @@ import { PostHogProvider } from "posthog-js/react";
 
 if (typeof window !== "undefined") {
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-    api_host: "/ingest",
+    api_host: window.location.origin + "/ingest",
     ui_host: "https://us.posthog.com",
     person_profiles: "identified_only",
     capture_pageview: false, // Capture manually in App Router
-    capture_pageleave: true, // explicitly enable pageleave
+    capture_pageleave: true,
   });
 }
 
