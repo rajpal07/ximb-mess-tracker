@@ -1,6 +1,20 @@
 import { NextResponse } from "next/server";
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 
+// Polyfill DOMMatrix and Path2D globally before dynamically importing pdfjs-dist
+if (typeof global !== "undefined") {
+  if (!("DOMMatrix" in global)) {
+    // @ts-expect-error - DOMMatrix doesn't exist on NodeJS global type
+    global.DOMMatrix = class DOMMatrix {
+      constructor() {}
+    };
+  }
+  if (!("Path2D" in global)) {
+    // @ts-expect-error - Path2D doesn't exist on NodeJS global type
+    global.Path2D = class Path2D {
+      constructor() {}
+    };
+  }
+}
 
 function titleCase(value: string): string {
   return value
@@ -21,6 +35,10 @@ export async function POST(request: Request) {
     }
 
     const arrayBuffer = await file.arrayBuffer();
+
+    // Dynamically import to ensure polyfills are defined beforehand
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+
     const loadingTask = pdfjs.getDocument({
       data: new Uint8Array(arrayBuffer),
       useSystemFonts: true,
