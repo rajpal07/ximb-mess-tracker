@@ -58,3 +58,5 @@ public/milestones.json
 next-env.d.ts
 tmp-*.log
 .codex-dev.log
+
+.vercel
