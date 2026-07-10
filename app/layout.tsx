@@ -11,7 +11,6 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { Providers } from "./providers";
-import PostHogPageView from "./PostHogPageView";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,7 +69,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${spaceGrotesk.variable} ${bricolageGrotesque.variable} ${instrumentSerif.variable} min-h-screen text-foreground bg-background font-sans antialiased`}
       >
         <Providers>
-          <PostHogPageView />
           {children}
         </Providers>
         <Analytics />
