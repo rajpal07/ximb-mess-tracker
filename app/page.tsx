@@ -115,7 +115,7 @@ export default function HomePage() {
 
   const [purchaseRecords, setPurchaseRecords] = useState<PurchaseRecord[]>([]);
   const [isImporting, setIsImporting] = useState(false);
-  const [importMessage, setImportMessage] = useState("drop your Shirdi Sai PDFs");
+  const [importMessage, setImportMessage] = useState("Drop your Shirdi Sai PDFs");
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [manualEntry, setManualEntry] = useState({
     date: `${selectedMonth}-01`,
@@ -310,7 +310,7 @@ export default function HomePage() {
     }
 
     setIsImporting(true);
-    setImportMessage("reading invoices...");
+    setImportMessage("Reading invoices...");
 
     const parsedInvoices: PurchaseRecord[] = [];
 
@@ -343,7 +343,7 @@ export default function HomePage() {
         }
       } catch (err) {
         console.error("Parsing error for file:", file.name, err);
-        setImportMessage(`couldn't read ${file.name}`);
+        setImportMessage(`Couldn't read ${file.name}`);
       }
     }
 
@@ -386,10 +386,10 @@ export default function HomePage() {
           return merged.sort((a, b) => a.date.localeCompare(b.date));
         });
 
-        setImportMessage(`added ${parsedInvoices.length} invoice${parsedInvoices.length > 1 ? "s" : ""}`);
+        setImportMessage(`Added ${parsedInvoices.length} invoice${parsedInvoices.length > 1 ? "s" : ""}`);
       } catch (err) {
         console.error("Error upserting uploads:", err);
-        setImportMessage("failed to save to database");
+        setImportMessage("Failed to save to database");
       }
     }
 
@@ -422,10 +422,10 @@ export default function HomePage() {
       setPurchaseRecords((current) =>
         current.filter((purchase) => !monthMatches(purchase.date, selectedMonth)),
       );
-      setImportMessage("month extras cleared");
+      setImportMessage("Month extras cleared");
     } catch (err) {
       console.error("Error clearing month:", err);
-      setImportMessage("failed to clear month");
+      setImportMessage("Failed to clear month");
     }
   }
 
@@ -443,10 +443,10 @@ export default function HomePage() {
       if (error) throw error;
 
       setPurchaseRecords([]);
-      setImportMessage("all uploads cleared");
+      setImportMessage("All uploads cleared");
     } catch (err) {
       console.error("Error clearing all purchases:", err);
-      setImportMessage("failed to clear all entries");
+      setImportMessage("Failed to clear all entries");
     }
   }
 
@@ -456,7 +456,7 @@ export default function HomePage() {
     const total = Number.parseFloat(manualEntry.total);
 
     if (!manualEntry.date || !item || Number.isNaN(total) || total <= 0) {
-      setImportMessage("fill date, item, and amount for the custom entry");
+      setImportMessage("Fill date, item, and amount for the custom entry");
       return;
     }
 
@@ -486,10 +486,10 @@ export default function HomePage() {
         item: "",
         total: "",
       }));
-      setImportMessage("manual entry added");
+      setImportMessage("Manual entry added");
     } catch (err) {
       console.error("Error adding manual entry:", err);
-      setImportMessage("failed to save entry");
+      setImportMessage("Failed to save entry");
     }
   }
 
@@ -507,7 +507,7 @@ export default function HomePage() {
       setPurchaseRecords((current) => current.filter((p) => p.id !== purchaseId));
     } catch (err) {
       console.error("Error deleting purchase:", err);
-      setImportMessage("failed to delete entry");
+      setImportMessage("Failed to delete entry");
     }
   }
 
@@ -559,14 +559,18 @@ export default function HomePage() {
 
             <div className="space-y-3">
               <h1 className="font-[family-name:var(--font-bricolage)] text-[2.6rem] font-bold leading-[1.05] tracking-tight">
-                your mess P&amp;L,
+                Your mess P&amp;L,
                 <br />
                 <span className="text-[#2a4a2e]">sorted.</span>
               </h1>
               <p className="text-sm leading-relaxed text-[#5c6a54]">
-                ₹222 a day at Shirdi Sai Canteen, plus every &ldquo;just one
-                lassi&rdquo; on top. upload the invoice PDFs — the math runs
-                itself, and month-end stops being a plot twist.
+                Four meals a day at Shirdi Sai Canteen, billed whether you show
+                up or not.
+                <br />
+                Sunk cost, literally.
+                <br />
+                This tracks that, plus every &ldquo;just one Diet Coke&rdquo; on
+                top, so month-end isn&rsquo;t a plot twist.
               </p>
             </div>
 
@@ -586,7 +590,7 @@ export default function HomePage() {
             </Button>
 
             <p className="text-center text-[11px] text-[#8a987e]">
-              your data stays yours. we just run the numbers.
+              Your data stays yours. We just run the numbers.
             </p>
           </div>
         </div>
@@ -697,20 +701,20 @@ export default function HomePage() {
         {/* Summary tickets */}
         <section className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[
-            { label: "fixed per day", value: formatCurrency(DAILY_FIXED_COST), sub: "the non-negotiable", delay: 80 },
+            { label: "fixed per day", value: formatCurrency(DAILY_FIXED_COST), sub: "The non-negotiable", delay: 80 },
             {
               label: "extras total",
               value: formatCurrency(summary.variableTotal),
               sub:
                 filteredPurchases.length > 0
                   ? `${filteredPurchases.length} moment${filteredPurchases.length === 1 ? "" : "s"} of weakness`
-                  : "none yet. iron discipline.",
+                  : "None yet. Iron discipline.",
               delay: 140,
             },
             {
               label: "month total",
               value: formatCurrency(summary.grandTotal),
-              sub: summary.customMonthTotal > 0 ? "using custom month total" : `burn rate ≈ ${formatCurrency(avgPerDay)}/day`,
+              sub: summary.customMonthTotal > 0 ? "Using custom month total" : `Burn rate ≈ ${formatCurrency(avgPerDay)}/day`,
               delay: 200,
             },
           ].map((card) => (
@@ -812,7 +816,7 @@ export default function HomePage() {
           <div className="ledger-card space-y-3 p-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">add an extra by hand</p>
-              <p className="text-xs text-[#8a987e]">no invoice? the 2 a.m. maggi still counts.</p>
+              <p className="text-xs text-[#8a987e]">No invoice? The 2 a.m. Maggi still counts.</p>
             </div>
 
             <div className="grid gap-2.5 md:grid-cols-[160px_1fr_140px_auto]">
