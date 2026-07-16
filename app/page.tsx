@@ -1,9 +1,10 @@
 "use client";
 
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Input } from "@heroui/react";
 import { supabase } from "@/app/utils/supabaseClient";
 import type { User } from "@supabase/supabase-js";
+import GmailSync, { type SyncedPurchase } from "@/app/GmailSync";
 
 const DAILY_FIXED_COST = 222;
 const DEFAULT_MESS_START_DATE = "2026-06-15";
@@ -288,12 +289,24 @@ export default function HomePage() {
 
   const todayKey = toLocalDateKey(new Date());
 
+  // Gmail sync + realtime feed both land here; dedupe by id.
+  const mergeNewPurchases = useCallback((records: SyncedPurchase[]) => {
+    setPurchaseRecords((current) => {
+      const byId = new Map(current.map((r) => [r.id, r]));
+      for (const r of records) byId.set(r.id, r);
+      return [...byId.values()].sort((a, b) => a.date.localeCompare(b.date));
+    });
+  }, []);
+
   async function handleGoogleLogin() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+          // Gmail read access rides on the same Google login — no second sign-in.
+          scopes: "https://www.googleapis.com/auth/gmail.readonly",
+          queryParams: { access_type: "offline", prompt: "consent" },
         },
       });
       if (error) throw error;
@@ -697,6 +710,9 @@ export default function HomePage() {
             </div>
           </div>
         </header>
+
+        {/* Gmail auto-sync */}
+        <GmailSync user={user} onNewPurchases={mergeNewPurchases} />
 
         {/* Summary tickets */}
         <section className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
