@@ -116,7 +116,7 @@ export default function HomePage() {
 
   const [purchaseRecords, setPurchaseRecords] = useState<PurchaseRecord[]>([]);
   const [isImporting, setIsImporting] = useState(false);
-  const [importMessage, setImportMessage] = useState("Drop your Shirdi Sai PDFs");
+  const [importMessage, setImportMessage] = useState("Drop your invoice PDFs");
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [manualEntry, setManualEntry] = useState({
     date: `${selectedMonth}-01`,
@@ -565,7 +565,7 @@ export default function HomePage() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#5c6a54]">
                 ximb mess tracker
               </p>
-              <span className="num text-[11px] uppercase tracking-wider text-[#8a987e]">shirdi sai canteen</span>
+              <span className="num text-[11px] uppercase tracking-wider text-[#8a987e]">mess canteen</span>
             </div>
 
             <div className="rule-dashed" />
@@ -577,7 +577,7 @@ export default function HomePage() {
                 <span className="text-[#2a4a2e]">sorted.</span>
               </h1>
               <p className="text-sm leading-relaxed text-[#5c6a54]">
-                Four meals a day at Shirdi Sai Canteen, billed whether you show
+                Four meals a day at the mess, billed whether you show
                 up or not.
                 <br />
                 Sunk cost, literally.
@@ -643,7 +643,7 @@ export default function HomePage() {
           <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#5c6a54]">
-                ximb · shirdi sai canteen
+                ximb · mess canteen
               </p>
               <h1 className="mt-1 font-[family-name:var(--font-bricolage)] text-4xl font-bold tracking-tight md:text-5xl">
                 mess ledger
