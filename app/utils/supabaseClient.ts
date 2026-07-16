@@ -11,4 +11,15 @@ if (!supabaseUrl || !supabaseAnonKey || supabaseUrl === "your-supabase-project-u
 const activeUrl = (supabaseUrl && supabaseUrl.startsWith("http")) ? supabaseUrl : "https://placeholder-project.supabase.co";
 const activeKey = supabaseAnonKey || "placeholder-anon-key";
 
-export const supabase = createClient(activeUrl, activeKey);
+export const supabase = createClient(activeUrl, activeKey, {
+  auth: {
+    // PKCE keeps OAuth tokens out of the URL hash — the callback returns a
+    // short-lived `?code=` that is exchanged for the session server-side by
+    // supabase-js, instead of the implicit flow dumping raw access/provider
+    // tokens into `/#access_token=…`.
+    flowType: "pkce",
+    detectSessionInUrl: true,
+    autoRefreshToken: true,
+    persistSession: true,
+  },
+});
