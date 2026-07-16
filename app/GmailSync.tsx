@@ -55,7 +55,7 @@ export default function GmailSync({
   const [pendingToken, setPendingToken] = useState<string | null>(null);
   const syncingRef = useRef(false);
 
-  const sync = useCallback(async () => {
+  const sync = useCallback(async (full = false) => {
     if (syncingRef.current) return;
     syncingRef.current = true;
     setStatus((s) => (s === "checking" ? s : "syncing"));
@@ -64,7 +64,7 @@ export default function GmailSync({
       const jwt = data.session?.access_token;
       if (!jwt) return;
 
-      const res = await fetch("/api/gmail/sync", {
+      const res = await fetch(`/api/gmail/sync${full ? "?full=1" : ""}`, {
         method: "POST",
         headers: { authorization: `Bearer ${jwt}` },
       });
@@ -228,7 +228,7 @@ export default function GmailSync({
           variant="flat"
           isLoading={status === "syncing" || status === "checking"}
           className="border border-[#d9d1bc] bg-[#fdfbf5] px-4 text-[#5c6a54]"
-          onPress={sync}
+          onPress={() => sync(true)}
         >
           sync now
         </Button>

@@ -25,7 +25,9 @@ export async function POST(req: Request) {
   }
 
   try {
-    const outcome = await syncGmailForUser(admin, row as GmailTokenRow);
+    const url = new URL(req.url);
+    const fullResync = url.searchParams.get("full") === "1";
+    const outcome = await syncGmailForUser(admin, row as GmailTokenRow, fullResync);
     return NextResponse.json(outcome);
   } catch (e) {
     const detail = e instanceof Error ? e.message : String(e);

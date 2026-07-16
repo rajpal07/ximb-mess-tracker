@@ -40,9 +40,11 @@ const OVERLAP_SEC = 3600;
 export async function syncGmailForUser(
   admin: AdminClient,
   row: GmailTokenRow,
+  fullResync = false,
 ): Promise<SyncOutcome> {
+  // fullResync ignores the watermark so deleted purchases are re-inserted.
   const afterEpochSec =
-    row.backfill_done && row.last_synced_at
+    !fullResync && row.backfill_done && row.last_synced_at
       ? Math.floor(new Date(row.last_synced_at).getTime() / 1000) - OVERLAP_SEC
       : undefined;
 
