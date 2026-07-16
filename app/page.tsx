@@ -126,14 +126,33 @@ export default function HomePage() {
 
   // Check auth state
   useEffect(() => {
+    // If we're landing on an OAuth callback, a session is about to be
+    // established (PKCE `?code=…`, or a legacy `#access_token=…` hash). Keep
+    // the stable loading state until it resolves instead of flashing the login
+    // screen while supabase-js exchanges the code.
+    const isOAuthCallback =
+      typeof window !== "undefined" &&
+      (new URLSearchParams(window.location.search).has("code") ||
+        /[#&](access_token|error)=/.test(window.location.hash));
+
+    // Once the callback resolves, strip the OAuth params from the URL so raw
+    // tokens / codes don't linger in the address bar or browser history.
+    const cleanOAuthParamsFromUrl = () => {
+      if (!isOAuthCallback || typeof window === "undefined") return;
+      window.history.replaceState({}, "", window.location.pathname);
+    };
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      setAuthLoading(false);
+      // While a callback is in flight, defer to onAuthStateChange so we don't
+      // briefly render the login screen before the session lands.
+      if (!isOAuthCallback) setAuthLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setAuthLoading(false);
+      cleanOAuthParamsFromUrl();
     });
 
     return () => {
@@ -306,7 +325,12 @@ export default function HomePage() {
           redirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
           // Gmail read access rides on the same Google login — no second sign-in.
           scopes: "https://www.googleapis.com/auth/gmail.readonly",
-          queryParams: { access_type: "offline", prompt: "consent" },
+          // `access_type: offline` still yields a refresh token on the first
+          // authorization. We deliberately omit `prompt: "consent"` here so
+          // returning users aren't forced through the Google consent screen on
+          // every login — the explicit "connect gmail" button re-forces consent
+          // if the refresh token is ever missing.
+          queryParams: { access_type: "offline" },
         },
       });
       if (error) throw error;
@@ -544,7 +568,10 @@ export default function HomePage() {
   };
 
   // --- Render Auth Loading Spinner ---
-  if (authLoading && !user) {
+  // Show the stable loading state whenever auth is in flight — including a
+  // transient `user === null` mid-transition — so the dashboard never tears
+  // down to a blank/login flash while a session is being (re)established.
+  if (authLoading) {
     return (
       <div className="paper-bg flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
