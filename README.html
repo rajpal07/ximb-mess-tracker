@@ -7,294 +7,281 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
   <style>
-    :root {
-      --green-dark: #16321e;
-      --green-mid: #2a4a2e;
-      --green-light: #4c8a3f;
-      --cream: #fdfbf5;
-      --cream-dark: #f4efe4;
-      --text-primary: #1f2a1c;
-      --text-secondary: #5c6a54;
-      --border: #d9d1bc;
-      --accent: #e08a2e;
-      --card-bg: #ffffff;
-    }
+    /* Premium PDF stylesheet for XIMB Mess Tracker docs */
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      color: var(--text-primary);
-      background-color: var(--cream);
-      padding: 40px 20px;
-    }
+:root {
+  --green-dark: #16321e;
+  --green-mid: #2a4a2e;
+  --green-light: #4c8a3f;
+  --cream: #fdfbf5;
+  --cream-dark: #f4efe4;
+  --text-primary: #1f2a1c;
+  --text-secondary: #5c6a54;
+  --border: #d9d1bc;
+  --accent: #e08a2e;
+}
 
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-      background: var(--card-bg);
-      padding: 56px 64px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      box-shadow: 0 10px 30px rgba(22, 50, 30, 0.05);
-    }
+* {
+  box-sizing: border-box;
+}
 
-    /* Typography */
-    h1 {
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--green-dark);
-      margin-top: 0;
-      margin-bottom: 16px;
-      padding-bottom: 16px;
-      border-bottom: 3px solid var(--green-dark);
-      letter-spacing: -0.5px;
-    }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11pt;
+  line-height: 1.7;
+  color: var(--text-primary);
+  background: white;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+}
 
-    h2 {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--green-dark);
-      margin-top: 44px;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 1.5px solid var(--border);
-      letter-spacing: -0.3px;
-    }
+/* Headings */
+h1 {
+  font-size: 28pt;
+  font-weight: 800;
+  color: var(--green-dark);
+  margin-top: 0;
+  margin-bottom: 8px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--green-dark);
+  letter-spacing: -0.5px;
+}
 
-    h3 {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--green-mid);
-      margin-top: 32px;
-      margin-bottom: 12px;
-    }
+h2 {
+  font-size: 18pt;
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-top: 36px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1.5px solid var(--border);
+  letter-spacing: -0.3px;
+  page-break-after: avoid;
+}
 
-    h4 {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-top: 24px;
-      margin-bottom: 8px;
-    }
+h3 {
+  font-size: 14pt;
+  font-weight: 600;
+  color: var(--green-mid);
+  margin-top: 28px;
+  margin-bottom: 8px;
+  page-break-after: avoid;
+}
 
-    p {
-      margin-bottom: 16px;
-    }
+h4 {
+  font-size: 12pt;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 20px;
+  margin-bottom: 6px;
+  page-break-after: avoid;
+}
 
-    strong {
-      font-weight: 700;
-      color: var(--text-primary);
-    }
+/* Paragraphs */
+p {
+  margin-bottom: 10px;
+  orphans: 3;
+  widows: 3;
+}
 
-    a {
-      color: var(--green-light);
-      text-decoration: none;
-      font-weight: 500;
-    }
+strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
 
-    a:hover {
-      text-decoration: underline;
-    }
+/* Links */
+a {
+  color: var(--green-light);
+  text-decoration: none;
+  font-weight: 500;
+}
 
-    /* Blockquotes & Callouts */
-    blockquote {
-      border-left: 4px solid var(--green-light);
-      background: var(--cream);
-      margin: 24px 0;
-      padding: 18px 24px;
-      border-radius: 0 10px 10px 0;
-      font-size: 15px;
-      color: var(--text-secondary);
-    }
+/* Blockquotes */
+blockquote {
+  border-left: 4px solid var(--green-light);
+  background: var(--cream);
+  margin: 16px 0;
+  padding: 14px 20px;
+  border-radius: 0 8px 8px 0;
+  font-size: 10.5pt;
+  color: var(--text-secondary);
+}
 
-    blockquote p {
-      margin-bottom: 8px;
-    }
+blockquote p {
+  margin-bottom: 6px;
+}
 
-    blockquote p:last-child {
-      margin-bottom: 0;
-    }
+blockquote p:last-child {
+  margin-bottom: 0;
+}
 
-    /* Tables */
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      margin: 24px 0;
-      font-size: 14px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
+blockquote strong {
+  color: var(--text-primary);
+}
 
-    thead {
-      background: var(--green-dark);
-      color: #ffffff;
-    }
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 10pt;
+  page-break-inside: auto;
+}
 
-    th {
-      padding: 12px 18px;
-      text-align: left;
-      font-weight: 600;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+thead {
+  background: var(--green-dark);
+  color: white;
+}
 
-    td {
-      padding: 12px 18px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: top;
-      background: var(--card-bg);
-    }
+th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 9.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
-    tbody tr:last-child td {
-      border-bottom: none;
-    }
+td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
 
-    tbody tr:nth-child(even) td {
-      background: var(--cream);
-    }
+tbody tr:nth-child(even) {
+  background: var(--cream);
+}
 
-    /* Code & Pre */
-    code {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13.5px;
-      background: var(--cream-dark);
-      padding: 3px 6px;
-      border-radius: 5px;
-      color: var(--green-dark);
-      font-weight: 500;
-    }
+tbody tr:hover {
+  background: var(--cream-dark);
+}
 
-    pre {
-      background: #1e1e2e;
-      color: #cdd6f4;
-      padding: 20px 24px;
-      border-radius: 12px;
-      overflow-x: auto;
-      font-size: 13.5px;
-      line-height: 1.6;
-      margin: 20px 0;
-      border: 1px solid #313244;
-    }
+/* Code blocks */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 9pt;
+  background: var(--cream-dark);
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: var(--green-dark);
+  font-weight: 500;
+}
 
-    pre code {
-      background: none;
-      padding: 0;
-      border-radius: 0;
-      color: inherit;
-      font-weight: 400;
-    }
+pre {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  padding: 18px 22px;
+  border-radius: 10px;
+  overflow-x: auto;
+  font-size: 9pt;
+  line-height: 1.6;
+  margin: 14px 0;
+  page-break-inside: avoid;
+}
 
-    /* Lists */
-    ul, ol {
-      padding-left: 28px;
-      margin: 16px 0;
-    }
+pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+  font-weight: 400;
+}
 
-    li {
-      margin-bottom: 8px;
-    }
+/* Lists */
+ul, ol {
+  padding-left: 24px;
+  margin: 8px 0;
+}
 
-    li::marker {
-      color: var(--green-light);
-      font-weight: 700;
-    }
+li {
+  margin-bottom: 4px;
+  line-height: 1.6;
+}
 
-    hr {
-      border: none;
-      height: 1px;
-      background: linear-gradient(to right, var(--border), transparent);
-      margin: 40px 0;
-    }
+li::marker {
+  color: var(--green-light);
+  font-weight: 700;
+}
 
-    /* Interactive Mermaid Diagram Container */
-    .mermaid-container {
-      position: relative;
-      margin: 32px 0;
-      background: var(--cream);
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      overflow: hidden;
-    }
+/* Horizontal rules */
+hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+  margin: 32px 0;
+}
 
-    .mermaid-hint {
-      position: absolute;
-      top: 10px;
-      right: 14px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      background: rgba(255, 255, 255, 0.85);
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      pointer-events: none;
-      z-index: 10;
-    }
+/* Mermaid diagrams */
+.mermaid {
+  text-align: center;
+  margin: 20px 0;
+  page-break-inside: avoid;
+}
 
-    .mermaid {
+.mermaid svg {
+  max-width: 100%;
+}
+
+/* ASCII art / diagram blocks */
+pre:not([class]) {
+  background: var(--cream);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 8.5pt;
+}
+
+/* Page break control */
+h2 {
+  page-break-before: auto;
+}
+
+/* Print optimizations */
+@media print {
+  body {
+    font-size: 10.5pt;
+  }
+
+  h1 {
+    font-size: 24pt;
+  }
+
+  h2 {
+    font-size: 16pt;
+  }
+
+  pre {
+    font-size: 8.5pt;
+  }
+
+  table {
+    font-size: 9pt;
+  }
+}
+
+    .mermaid-static-container {
       display: flex;
       justify-content: center;
       align-items: center;
+      margin: 28px 0;
+      background: var(--cream);
       padding: 20px;
-      min-height: 240px;
-      width: 100%;
-      cursor: grab;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      page-break-inside: avoid;
     }
-
-    .mermaid:active {
-      cursor: grabbing;
-    }
-
-    .mermaid svg {
-      width: 100% !important;
-      height: 100% !important;
-      min-height: 220px;
-    }
-
-    /* Node Hover Highlight Effects */
-    .mermaid .node:hover rect,
-    .mermaid .node:hover circle,
-    .mermaid .node:hover polygon {
-      stroke: var(--green-dark) !important;
-      stroke-width: 3px !important;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
-      transition: all 0.2s ease;
-    }
-
-    /* Pan-Zoom Controls Style */
-    #svg-pan-zoom-controls {
-      transform: scale(0.85);
-      transform-origin: 100% 100%;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      body {
-        padding: 16px 10px;
-      }
-      .container {
-        padding: 28px 20px;
-        border-radius: 12px;
-      }
-      h1 { font-size: 26px; }
-      h2 { font-size: 19px; }
+    .mermaid-static-container svg {
+      max-width: 100% !important;
+      height: auto !important;
     }
   </style>
 </head>
-<body>
+<body class="markdown-body">
   <div class="container">
     <h1 id="ximb-mess-tracker">XIMB Mess Tracker</h1>
 <p><strong>Your mess P&amp;L, sorted. Automatically.</strong></p>
@@ -571,41 +558,5 @@ npm install
 </p>
 
   </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      mermaid.initialize({
-        startOnLoad: true,
-        theme: 'neutral',
-        securityLevel: 'loose',
-        flowchart: { curve: 'basis' }
-      });
-      
-      await mermaid.run();
-
-      // Attach pan-zoom controls to all rendered Mermaid SVG diagrams
-      document.querySelectorAll('.mermaid-container').forEach((container) => {
-        const hint = document.createElement('div');
-        hint.className = 'mermaid-hint';
-        hint.innerText = 'Drag to pan · Scroll to zoom';
-        container.appendChild(hint);
-
-        const svg = container.querySelector('svg');
-        if (svg) {
-          svg.setAttribute('width', '100%');
-          svg.setAttribute('height', '100%');
-          svgPanZoom(svg, {
-            zoomEnabled: true,
-            controlIconsEnabled: true,
-            fit: true,
-            center: true,
-            minZoom: 0.5,
-            maxZoom: 10,
-            zoomScaleSensitivity: 0.2
-          });
-        }
-      });
-    });
-  </script>
 </body>
 </html>
