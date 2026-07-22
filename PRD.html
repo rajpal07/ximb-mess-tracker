@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XIMB Mess Tracker - Product Requirements Document</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --green-dark: #16321e;
+      --green-mid: #2a4a2e;
+      --green-light: #4c8a3f;
+      --cream: #fdfbf5;
+      --cream-dark: #f4efe4;
+      --text-primary: #1f2a1c;
+      --text-secondary: #5c6a54;
+      --border: #d9d1bc;
+      --accent: #e08a2e;
+      --card-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      background-color: var(--cream);
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 56px 64px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(22, 50, 30, 0.05);
+    }
+
+    /* Typography */
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--green-dark);
+      margin-top: 0;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 3px solid var(--green-dark);
+      letter-spacing: -0.5px;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--green-dark);
+      margin-top: 44px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1.5px solid var(--border);
+      letter-spacing: -0.3px;
+    }
+
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--green-mid);
+      margin-top: 32px;
+      margin-bottom: 12px;
+    }
+
+    h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-bottom: 16px;
+    }
+
+    strong {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    a {
+      color: var(--green-light);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Blockquotes & Callouts */
+    blockquote {
+      border-left: 4px solid var(--green-light);
+      background: var(--cream);
+      margin: 24px 0;
+      padding: 18px 24px;
+      border-radius: 0 10px 10px 0;
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    blockquote p {
+      margin-bottom: 8px;
+    }
+
+    blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 24px 0;
+      font-size: 14px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    thead {
+      background: var(--green-dark);
+      color: #ffffff;
+    }
+
+    th {
+      padding: 12px 18px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      background: var(--card-bg);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:nth-child(even) td {
+      background: var(--cream);
+    }
+
+    /* Code & Pre */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px;
+      background: var(--cream-dark);
+      padding: 3px 6px;
+      border-radius: 5px;
+      color: var(--green-dark);
+      font-weight: 500;
+    }
+
+    pre {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      padding: 20px 24px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-size: 13.5px;
+      line-height: 1.6;
+      margin: 20px 0;
+      border: 1px solid #313244;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      border-radius: 0;
+      color: inherit;
+      font-weight: 400;
+    }
+
+    /* Lists */
+    ul, ol {
+      padding-left: 28px;
+      margin: 16px 0;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    li::marker {
+      color: var(--green-light);
+      font-weight: 700;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+      margin: 40px 0;
+    }
+
+    /* Mermaid Diagrams */
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 32px 0;
+      background: var(--cream);
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .mermaid svg {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 10px;
+      }
+      .container {
+        padding: 28px 20px;
+        border-radius: 12px;
+      }
+      h1 { font-size: 26px; }
+      h2 { font-size: 19px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="product-requirements-document-prd">Product Requirements Document (PRD)</h1>
+<h2 id="ximb-mess-tracker---automated-invoice-processing-system">XIMB Mess Tracker - Automated Invoice Processing System</h2>
+<p><strong>Version:</strong> 1.0
+<strong>Last Updated:</strong> July 2026
+<strong>Status:</strong> Production (Live)</p>
+<hr>
+<h2 id="1-problem-statement">1. Problem Statement</h2>
+<h3 id="the-pain">The Pain</h3>
+<p>Imagine you eat lunch and dinner at your school cafeteria every day. Every time you buy something extra (like a cold drink or snacks), they give you a little paper receipt.</p>
+<p>At the end of the month: <strong>&quot;How much did you spend?&quot;</strong></p>
+<p>Now you have to:</p>
+<ol>
+<li>Find 30 emails with receipts</li>
+<li>Open each PDF receipt one by one</li>
+<li>Read every single item and price</li>
+<li>Type it all into a spreadsheet</li>
+<li>Add everything up</li>
+<li>Subtract what you already paid</li>
+</ol>
+<p><strong>That&#39;s exhausting. And boring. And you WILL make mistakes.</strong></p>
+<h3 id="the-solution">The Solution</h3>
+<p><strong>What if a bot did all of that for you?</strong></p>
+<p>That&#39;s exactly what XIMB Mess Tracker does. You sign in once with Google, and the robot:</p>
+<ul>
+<li>Opens your email</li>
+<li>Finds the invoice PDFs</li>
+<li>Reads every item and price</li>
+<li>Saves it all</li>
+<li>Shows you a beautiful daily spending diary</li>
+<li>Does this every single day, automatically</li>
+</ul>
+<p><strong>You do nothing. The bot does everything.</strong></p>
+<hr>
+<h2 id="2-target-users">2. Target Users</h2>
+<table>
+<thead>
+<tr>
+<th>User Type</th>
+<th>Description</th>
+<th>Pain Level</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>XIMB Students</strong></td>
+<td>~500 students eating at the campus mess daily</td>
+<td>High - manual tracking takes 30+ min/month</td>
+</tr>
+<tr>
+<td><strong>Mess Committee</strong></td>
+<td>Student body managing mess operations</td>
+<td>Medium - need aggregate spending data</td>
+</tr>
+<tr>
+<td><strong>Individual Trackers</strong></td>
+<td>Students who want to budget their food spending</td>
+<td>Low - want visibility, not just numbers</td>
+</tr>
+</tbody></table>
+<h3 id="user-persona">User Persona</h3>
+<blockquote>
+<p><strong>Aditya, 22, MBA Student at XIMB</strong></p>
+<p>&quot;I get an invoice email every time I buy something extra at the mess. By month-end, I have 20-30 emails. I used to open each one, note down the amount, and add it up in my head. Half the time I&#39;d forget or get the math wrong. Now I just open the app and everything&#39;s already there.&quot;</p>
+</blockquote>
+<hr>
+<h2 id="3-automation-architecture">3. Automation Architecture</h2>
+<p>This is the core differentiator. <strong>Everything is automated.</strong> Here&#39;s the complete system:</p>
+<h3 id="31-high-level-system-architecture">3.1 High-Level System Architecture</h3>
+<div class="mermaid">
+graph TB
+    subgraph UserLayer ["User Layer"]
+        A["Student opens app"]
+        B["Signs in with Google"]
+    end
+
+    subgraph AutoLayer ["Automation Layer"]
+        C["Gmail API Scanner"]
+        D["PDF Parser Engine"]
+        E["Daily Cron Job"]
+        F["Real-time Sync"]
+    end
+
+    subgraph DataLayer ["Data Layer"]
+        G["Supabase PostgreSQL"]
+        H["Encrypted Token Store"]
+        I["Row-Level Security"]
+    end
+
+    subgraph PresLayer ["Presentation Layer"]
+        J["Daily Spending Table"]
+        K["Monthly P&L Summary"]
+        L["Push Notifications"]
+    end
+
+    A --> B
+    B --> C
+    C --> D
+    D --> G
+    E --> C
+    G --> F
+    F --> J
+    F --> K
+    G --> L
+    H --> C
+    I --> G
+
+    style C fill:#4c8a3f,color:#fff
+    style D fill:#4c8a3f,color:#fff
+    style E fill:#4c8a3f,color:#fff
+    style F fill:#4c8a3f,color:#fff
+</div>
+<h3 id="32-the-automation-pipeline-detailed-flow">3.2 The Automation Pipeline (Detailed Flow)</h3>
+<p>This is the step-by-step journey of an invoice from email to dashboard:</p>
+<div class="mermaid">
+flowchart TD
+    A["Mess canteen sends invoice email"] --> B["Gmail API: Search for emails"]
+    B --> C{"Found emails with<br/>invoice PDF files?"}
+    C -->|No| D["Already up to date"]
+    C -->|Yes| E["Download PDF attachments"]
+    E --> F["unpdf: Extract raw text from PDF"]
+    F --> G["Regex Parser: Find invoice date"]
+    G --> H["Regex Parser: Find item table rows"]
+    H --> I{"Items found<br/>in structured table?"}
+    I -->|Yes| J["Extract: Item Name, Qty, Price"]
+    I -->|No| K["Fallback: Extract total amount"]
+    J --> L["Generate deterministic ID per item"]
+    K --> L
+    L --> M["Upsert into purchases table"]
+    M --> N["Supabase Realtime broadcasts INSERT"]
+    N --> O["All open tabs receive live update"]
+    O --> P["Push notification: New invoice logged"]
+
+    style A fill:#e08a2e,color:#fff
+    style F fill:#4c8a3f,color:#fff
+    style G fill:#4c8a3f,color:#fff
+    style H fill:#4c8a3f,color:#fff
+    style J fill:#4c8a3f,color:#fff
+    style L fill:#4c8a3f,color:#fff
+    style N fill:#2a4a2e,color:#fff
+</div>
+<blockquote>
+<p><strong>Green boxes = Automated by code (no human involved)</strong></p>
+<p><strong>Orange box = The only external trigger (an email arriving)</strong></p>
+</blockquote>
+<h3 id="33-authentication--security-flow">3.3 Authentication &amp; Security Flow</h3>
+<div class="mermaid">
+sequenceDiagram
+    participant User
+    participant App
+    participant Google
+    participant Supabase
+    participant GmailAPI
+
+    User->>App: Click "Sign in with Google"
+    App->>Google: OAuth 2.0 + PKCE + Gmail scope
+    Google->>User: Consent screen (one-time)
+    User->>Google: Approve access
+    Google->>App: Authorization code
+    App->>Supabase: Exchange code for session
+    Supabase->>App: Session + refresh_token
+    App->>App: Encrypt refresh_token (AES-256-GCM)
+    App->>Supabase: Store encrypted token in gmail_tokens
+  
+    Note over App,GmailAPI: Now automation begins...
+  
+    App->>Supabase: Read encrypted token
+    App->>App: Decrypt token
+    App->>Google: Exchange refresh_token for access_token
+    Google->>App: Short-lived access_token
+    App->>GmailAPI: Fetch invoice emails
+    GmailAPI->>App: Email list + PDF attachments
+    App->>App: Parse PDFs, extract items
+    App->>Supabase: Upsert purchases
+</div>
+<h3 id="34-three-sync-triggers">3.4 Three Sync Triggers</h3>
+<p>The automation doesn&#39;t just run once. It runs through <strong>three different triggers</strong>:</p>
+<div class="mermaid">
+graph LR
+    subgraph Trigger1 ["Trigger 1: Page Load"]
+        A1["User opens app"] --> A2["Immediate sync"]
+    end
+
+    subgraph Trigger2 ["Trigger 2: Polling"]
+        B1["Tab is open"] --> B2["Every 60 seconds"]
+        B2 --> B3["Check for new emails"]
+    end
+
+    subgraph Trigger3 ["Trigger 3: Daily Cron"]
+        C1["Vercel Cron: midnight"] --> C2["Sync ALL users"]
+        C2 --> C3["Even if app is closed"]
+    end
+
+    A2 --> D["Gmail > PDF > Parse > Save"]
+    B3 --> D
+    C3 --> D
+
+    style D fill:#4c8a3f,color:#fff
+    style C3 fill:#e08a2e,color:#fff
+</div>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>When</th>
+<th>Who</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Page Load</strong></td>
+<td>User opens the app</td>
+<td>Single user</td>
+<td>Catch up on any missed invoices</td>
+</tr>
+<tr>
+<td><strong>60s Polling</strong></td>
+<td>While tab is open</td>
+<td>Single user</td>
+<td>Near-real-time for active users</td>
+</tr>
+<tr>
+<td><strong>Daily Cron</strong></td>
+<td>Midnight, every day</td>
+<td>ALL users</td>
+<td>Ensures nobody falls behind, even if they don&#39;t open the app</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="4-data-model">4. Data Model</h2>
+<h3 id="41-entity-relationship-diagram">4.1 Entity Relationship Diagram</h3>
+<div class="mermaid">
+erDiagram
+    AUTH_USERS ||--o{ PURCHASES : "has many"
+    AUTH_USERS ||--o| SETTINGS : "has one"
+    AUTH_USERS ||--o| GMAIL_TOKENS : "has one"
+
+    AUTH_USERS {
+        uuid id PK
+        text email
+        text provider
+    }
+
+    PURCHASES {
+        text id PK
+        uuid user_id FK
+        date date
+        text item
+        text source_file
+        numeric total
+        timestamp created_at
+    }
+
+    SETTINGS {
+        uuid user_id PK
+        date mess_start_date
+        jsonb advance_by_month
+        jsonb custom_total_by_month
+        timestamp updated_at
+    }
+
+    GMAIL_TOKENS {
+        uuid user_id PK
+        text refresh_token
+        text email
+        timestamp last_synced_at
+        boolean backfill_done
+        timestamp updated_at
+    }
+</div>
+<h3 id="42-table-details">4.2 Table Details</h3>
+<h4 id="purchases---every-food-item-you-bought"><code>purchases</code> - Every food item you bought</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>TEXT</td>
+<td>Deterministic ID:<code>gm-{userId}-{msgId}-{attachIdx}-{itemIdx}</code> for Gmail items, UUID for manual entries</td>
+</tr>
+<tr>
+<td><code>user_id</code></td>
+<td>UUID</td>
+<td>Who bought this</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>DATE</td>
+<td>When they bought it</td>
+</tr>
+<tr>
+<td><code>item</code></td>
+<td>TEXT</td>
+<td>What they bought (e.g., &quot;Paneer Butter Masala (2)&quot;)</td>
+</tr>
+<tr>
+<td><code>source_file</code></td>
+<td>TEXT</td>
+<td>Which invoice PDF this came from</td>
+</tr>
+<tr>
+<td><code>total</code></td>
+<td>NUMERIC</td>
+<td>How much it cost (Rs)</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Why deterministic IDs?</strong> So the same invoice processed twice doesn&#39;t create duplicate entries. The ID is built from the Gmail message ID + attachment index + item index. This makes the entire pipeline <strong>idempotent</strong>. You can run it 100 times and get the same result.</p>
+</blockquote>
+<h4 id="gmail_tokens---encrypted-gmail-credentials"><code>gmail_tokens</code> - Encrypted Gmail credentials</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user_id</code></td>
+<td>UUID</td>
+<td>Token owner</td>
+</tr>
+<tr>
+<td><code>refresh_token</code></td>
+<td>TEXT</td>
+<td>AES-256-GCM encrypted Google refresh token</td>
+</tr>
+<tr>
+<td><code>last_synced_at</code></td>
+<td>TIMESTAMPTZ</td>
+<td>Watermark for incremental sync</td>
+</tr>
+<tr>
+<td><code>backfill_done</code></td>
+<td>BOOLEAN</td>
+<td>Has the full history been scanned?</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Security:</strong> No RLS policies exist on this table. It has RLS enabled but zero policies. This means only the <code>SUPABASE_SERVICE_ROLE_KEY</code> (server-side) can read/write tokens. The browser client can never access them.</p>
+</blockquote>
+<hr>
+<h2 id="5-automation-deep-dive">5. Automation Deep Dive</h2>
+<h3 id="51-pdf-invoice-parsing-engine">5.1 PDF Invoice Parsing Engine</h3>
+<p>The parser is the &quot;brain&quot; of the system. It takes raw PDF bytes and produces structured data.</p>
+<div class="mermaid">
+flowchart TD
+    A["Raw PDF bytes"] --> B["unpdf: getDocumentProxy"]
+    B --> C["unpdf: extractText"]
+    C --> D["Normalize whitespace"]
+    D --> E["Regex: Find Invoice Date"]
+    E --> F{"Date found?"}
+    F -->|No| G["Throw Error"]
+    F -->|Yes| H["Regex: Match item table rows"]
+    H --> I{"Structured rows<br/>found?"}
+    I -->|Yes| J["For each row:<br/>- Extract item name<br/>- Extract quantity<br/>- Extract price<br/>- Title-case the name<br/>- Add qty suffix if > 1"]
+    I -->|No| K["Fallback Strategy:<br/>- Find 'Total Invoice Amount'<br/>- Use filename as item name"]
+    J --> L["Return ParsedInvoiceItem array"]
+    K --> L
+
+    style B fill:#4c8a3f,color:#fff
+    style C fill:#4c8a3f,color:#fff
+    style H fill:#4c8a3f,color:#fff
+    style J fill:#4c8a3f,color:#fff
+</div>
+<p><strong>What the parser understands:</strong></p>
+<pre><code>Input PDF text (simplified):
+&quot;Invoice Date: 15-07-2026 ... 1 PANEER BUTTER MASALA 2 2.0PC ... 90.00 ... 2 COLD DRINK 1 1.0PC ... 30.00&quot;
+
+Output:
+[
+  { date: &quot;2026-07-15&quot;, item: &quot;Paneer Butter Masala (2)&quot;, total: 90.00 },
+  { date: &quot;2026-07-15&quot;, item: &quot;Cold Drink&quot;, total: 30.00 }
+]
+</code></pre>
+<h3 id="52-gmail-scanning-engine">5.2 Gmail Scanning Engine</h3>
+<div class="mermaid">
+flowchart TD
+    A["Start: accessTokenFor refreshToken"] --> B{"Token cached<br/>& not expired?"}
+    B -->|Yes| C["Use cached access token"]
+    B -->|No| D["POST oauth2.googleapis.com/token"]
+    D --> E{"Success?"}
+    E -->|No, invalid_grant| F["Token revoked, delete from DB<br/>Return 'not_connected'"]
+    E -->|No, other| G["Throw error, retry later"]
+    E -->|Yes| H["Cache new access_token"]
+    H --> C
+    C --> I["Build Gmail search query"]
+    I --> J["Search: from: invoice senders<br/>has:attachment filename:pdf"]
+    J --> K["Paginate through all results"]
+    K --> L["For each message, chunked 10 at a time:"]
+    L --> M["Flatten MIME parts"]
+    M --> N["Filter: filename starts with 'invoice'<br/>and ends with '.pdf'"]
+    N --> O["Download attachment data"]
+    O --> P["Return FetchedInvoice array"]
+
+    style D fill:#4c8a3f,color:#fff
+    style J fill:#4c8a3f,color:#fff
+    style M fill:#4c8a3f,color:#fff
+    style N fill:#4c8a3f,color:#fff
+</div>
+<p><strong>Search query used:</strong></p>
+<pre><code>from:(noreply@wepsol.com) has:attachment filename:pdf
+</code></pre>
+<p><strong>Rate limiting:</strong> Messages are processed in chunks of 10 to stay under Gmail&#39;s per-user API quota.</p>
+<h3 id="53-encryption-system">5.3 Encryption System</h3>
+<div class="mermaid">
+flowchart LR
+    subgraph EncryptStore ["Encrypt (store-token)"]
+        A["Plain refresh_token"] --> B["Generate random 12-byte IV"]
+        B --> C["AES-256-GCM encrypt"]
+        C --> D["Output: iv.authTag.ciphertext\n(base64 encoded, dot-separated)"]
+    end
+
+    subgraph DecryptSync ["Decrypt (sync)"]
+        E["Stored: iv.authTag.ciphertext"] --> F["Split by dots"]
+        F --> G["Base64 decode each part"]
+        G --> H["AES-256-GCM decrypt"]
+        H --> I["Plain refresh_token"]
+    end
+</div>
+<p><strong>Why AES-256-GCM?</strong></p>
+<ul>
+<li><strong>AES-256</strong> = Military-grade encryption (even governments use this)</li>
+<li><strong>GCM</strong> = Also verifies the data wasn&#39;t tampered with (authentication tag)</li>
+<li><strong>Random IV</strong> = Same token encrypted twice produces different output (prevents pattern analysis)</li>
+</ul>
+<hr>
+<h2 id="6-user-interface">6. User Interface</h2>
+<h3 id="61-screen-flow">6.1 Screen Flow</h3>
+<div class="mermaid">
+flowchart TD
+    A["App loads"] --> B{"User signed in?"}
+    B -->|No| C["Login Screen<br/>'Sign in with Google'"]
+    B -->|Yes| D["Dashboard"]
+    C --> E["Google OAuth + PKCE"]
+    E --> D
+  
+    D --> F["Gmail Sync Status Bar"]
+    D --> G["Month Selector"]
+    D --> H["Summary Cards<br/>(Fixed | Extras | Total | Payable)"]
+    D --> I["Daily Spending Table"]
+    D --> J["Manual Entry Form"]
+    D --> K["PDF Upload Dropzone"]
+  
+    F --> F1{"Connected?"}
+    F1 -->|No| F2["'Connect Gmail' button"]
+    F1 -->|Yes| F3["Auto-syncing...<br/>Status: up to date, 3:45 PM"]
+  
+    I --> I1["Desktop: Full table<br/>with expandable rows"]
+    I --> I2["Mobile: Card list<br/>with collapsible items"]
+</div>
+<h3 id="62-key-ui-components">6.2 Key UI Components</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What It Shows</th>
+<th>Automation Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Gmail Sync Bar</strong></td>
+<td>Green/red dot, sync status, last sync time</td>
+<td>Shows automation is working</td>
+</tr>
+<tr>
+<td><strong>Summary Cards</strong></td>
+<td>Fixed total, variable total, grand total, payable</td>
+<td>Auto-calculated from synced data</td>
+</tr>
+<tr>
+<td><strong>Daily Table</strong></td>
+<td>Date, fixed cost, extras (expandable), daily total</td>
+<td>Auto-populated from parsed invoices</td>
+</tr>
+<tr>
+<td><strong>Month Selector</strong></td>
+<td>Switch between months</td>
+<td>Filters auto-synced data</td>
+</tr>
+<tr>
+<td><strong>Payable Bar</strong></td>
+<td>Final amount owed (total minus advance)</td>
+<td>The &quot;answer&quot;, fully automated</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="7-security-model">7. Security Model</h2>
+<h3 id="71-defense-in-depth">7.1 Defense in Depth</h3>
+<div class="mermaid">
+graph TD
+    subgraph Layer1 ["Layer 1: Authentication"]
+        A["Google OAuth 2.0 + PKCE"]
+        B["No passwords stored"]
+    end
+
+    subgraph Layer2 ["Layer 2: Authorization"]
+        C["Supabase Row-Level Security"]
+        D["Users can only see their own data"]
+    end
+
+    subgraph Layer3 ["Layer 3: Encryption"]
+        E["Gmail tokens: AES-256-GCM at rest"]
+        F["GMAIL_TOKEN_KEY: 256-bit server-side secret"]
+    end
+
+    subgraph Layer4 ["Layer 4: API Security"]
+        G["Cron: Bearer token auth"]
+        H["User APIs: JWT verification"]
+        I["gmail_tokens: No RLS policies = server-only"]
+    end
+
+    A --> C --> E --> G
+    B --> D --> F --> H
+
+    style E fill:#c94f36,color:#fff
+    style F fill:#c94f36,color:#fff
+</div>
+<h3 id="72-key-security-decisions">7.2 Key Security Decisions</h3>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>PKCE auth flow</strong></td>
+<td>Prevents authorization code interception attacks (no client_secret in browser)</td>
+</tr>
+<tr>
+<td><strong>Encrypted refresh tokens</strong></td>
+<td>Even if the database is breached, tokens are useless without the encryption key</td>
+</tr>
+<tr>
+<td><strong>Server-only token access</strong></td>
+<td><code>gmail_tokens</code> table has RLS enabled with zero policies = browser JS can never read it</td>
+</tr>
+<tr>
+<td><strong>Deterministic purchase IDs</strong></td>
+<td>Prevents duplicate entries and makes the pipeline safely re-runnable</td>
+</tr>
+<tr>
+<td><strong>1-hour sync overlap window</strong></td>
+<td>Ensures no invoices are missed at sync boundaries</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="8-automation-configurations">8. Automation Configurations</h2>
+<h3 id="81-vercel-cron-configuration">8.1 Vercel Cron Configuration</h3>
+<pre><code class="language-json">{
+  &quot;crons&quot;: [
+    {
+      &quot;path&quot;: &quot;/api/gmail/sync-all&quot;,
+      &quot;schedule&quot;: &quot;0 0 * * *&quot;
+    }
+  ]
+}
+</code></pre>
+<p><strong>Translation:</strong> &quot;Every day at midnight UTC, call the sync-all endpoint to process all connected users.&quot;</p>
+<h3 id="82-invoice-sender-whitelist">8.2 Invoice Sender Whitelist</h3>
+<pre><code class="language-typescript">export const INVOICE_SENDERS = [&quot;noreply@wepsol.com&quot;];
+</code></pre>
+<p>Only emails from <code>noreply@wepsol.com</code> (the official canteen automated invoice sender) are scanned. This prevents the app from reading personal or unrelated emails.</p>
+<h3 id="83-attachment-filter-rules">8.3 Attachment Filter Rules</h3>
+<pre><code>Accepted: invoice-july-2026.pdf, Invoice_15072026.pdf
+Rejected: receipt.pdf, menu.pdf, photo.jpg
+</code></pre>
+<p>Rule: Filename must <strong>start with &quot;invoice&quot;</strong> AND <strong>end with &quot;.pdf&quot;</strong>.</p>
+<hr>
+<h2 id="9-performance--scalability">9. Performance &amp; Scalability</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Current</th>
+<th>Design Limit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Users</strong></td>
+<td>3 active</td>
+<td>Unlimited (each syncs independently)</td>
+</tr>
+<tr>
+<td><strong>Sync latency</strong></td>
+<td>~2-5 seconds per user</td>
+<td>60-second max duration (Vercel)</td>
+</tr>
+<tr>
+<td><strong>PDF parse time</strong></td>
+<td>~200ms per invoice</td>
+<td>Serverless scales horizontally</td>
+</tr>
+<tr>
+<td><strong>Gmail API calls</strong></td>
+<td>Chunked (10 messages/batch)</td>
+<td>Stays under per-user quota</td>
+</tr>
+<tr>
+<td><strong>Cron frequency</strong></td>
+<td>Daily (midnight UTC)</td>
+<td>Can increase to hourly if needed</td>
+</tr>
+<tr>
+<td><strong>Real-time updates</strong></td>
+<td>~100ms (Supabase Realtime)</td>
+<td>WebSocket, no polling</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="10-future-roadmap">10. Future Roadmap</h2>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Feature</th>
+<th>Automation Level</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P0</td>
+<td><strong>Multi-canteen support</strong></td>
+<td>Auto-detect canteen from invoice format</td>
+</tr>
+<tr>
+<td>P1</td>
+<td><strong>Spending insights</strong></td>
+<td>Auto-generated weekly spending summaries</td>
+</tr>
+<tr>
+<td>P1</td>
+<td><strong>Budget alerts</strong></td>
+<td>Auto-notify when spending exceeds threshold</td>
+</tr>
+<tr>
+<td>P2</td>
+<td><strong>WhatsApp sync</strong></td>
+<td>Parse invoices from WhatsApp messages</td>
+</tr>
+<tr>
+<td>P2</td>
+<td><strong>Receipt OCR</strong></td>
+<td>Camera capture to OCR to auto-log (for paper receipts)</td>
+</tr>
+<tr>
+<td>P3</td>
+<td><strong>Mess committee dashboard</strong></td>
+<td>Aggregate analytics for mess management</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="11-success-metrics">11. Success Metrics</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+<th>How We Measure</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Zero-touch rate</strong></td>
+<td>&gt;90% of purchases auto-logged</td>
+<td><code>source_file LIKE &#39;invoice%&#39;</code> / total purchases</td>
+</tr>
+<tr>
+<td><strong>Sync reliability</strong></td>
+<td>&gt;99% daily cron success</td>
+<td>Vercel Cron logs</td>
+</tr>
+<tr>
+<td><strong>Time saved</strong></td>
+<td>30+ min/month per user</td>
+<td>User survey</td>
+</tr>
+<tr>
+<td><strong>Parse accuracy</strong></td>
+<td>&gt;95% items correctly extracted</td>
+<td>Manual spot-checks</td>
+</tr>
+<tr>
+<td><strong>Active users</strong></td>
+<td>50+ monthly</td>
+<td>PostHog analytics</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="12-testing-strategy">12. Testing Strategy</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Parser</strong></td>
+<td>Invoice PDF extraction accuracy</td>
+<td>Sample PDFs with known items, compare output</td>
+</tr>
+<tr>
+<td><strong>Sync</strong></td>
+<td>End-to-end Gmail to DB pipeline</td>
+<td>Test accounts with known invoice emails</td>
+</tr>
+<tr>
+<td><strong>Auth</strong></td>
+<td>OAuth flow + token storage</td>
+<td>Manual browser testing</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>Token encryption/decryption roundtrip</td>
+<td>Unit test: encrypt then decrypt = original</td>
+</tr>
+<tr>
+<td><strong>Cron</strong></td>
+<td>Daily sync-all reliability</td>
+<td>Vercel Cron monitoring dashboard</td>
+</tr>
+</tbody></table>
+<hr>
+<p align="center">
+  <b>XIMB Mess Tracker. Because life's too short to count mess bills by hand.</b><br>
+  <i>Automated. Zero effort.</i>
+</p>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'neutral',
+        securityLevel: 'loose',
+        flowchart: { curve: 'basis' }
+      });
+      await mermaid.run();
+    });
+  </script>
+</body>
+</html>

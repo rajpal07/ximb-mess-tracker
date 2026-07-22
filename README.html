@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XIMB Mess Tracker - Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --green-dark: #16321e;
+      --green-mid: #2a4a2e;
+      --green-light: #4c8a3f;
+      --cream: #fdfbf5;
+      --cream-dark: #f4efe4;
+      --text-primary: #1f2a1c;
+      --text-secondary: #5c6a54;
+      --border: #d9d1bc;
+      --accent: #e08a2e;
+      --card-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      background-color: var(--cream);
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 56px 64px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(22, 50, 30, 0.05);
+    }
+
+    /* Typography */
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--green-dark);
+      margin-top: 0;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 3px solid var(--green-dark);
+      letter-spacing: -0.5px;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--green-dark);
+      margin-top: 44px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1.5px solid var(--border);
+      letter-spacing: -0.3px;
+    }
+
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--green-mid);
+      margin-top: 32px;
+      margin-bottom: 12px;
+    }
+
+    h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-bottom: 16px;
+    }
+
+    strong {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    a {
+      color: var(--green-light);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Blockquotes & Callouts */
+    blockquote {
+      border-left: 4px solid var(--green-light);
+      background: var(--cream);
+      margin: 24px 0;
+      padding: 18px 24px;
+      border-radius: 0 10px 10px 0;
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    blockquote p {
+      margin-bottom: 8px;
+    }
+
+    blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 24px 0;
+      font-size: 14px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    thead {
+      background: var(--green-dark);
+      color: #ffffff;
+    }
+
+    th {
+      padding: 12px 18px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      background: var(--card-bg);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:nth-child(even) td {
+      background: var(--cream);
+    }
+
+    /* Code & Pre */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px;
+      background: var(--cream-dark);
+      padding: 3px 6px;
+      border-radius: 5px;
+      color: var(--green-dark);
+      font-weight: 500;
+    }
+
+    pre {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      padding: 20px 24px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-size: 13.5px;
+      line-height: 1.6;
+      margin: 20px 0;
+      border: 1px solid #313244;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      border-radius: 0;
+      color: inherit;
+      font-weight: 400;
+    }
+
+    /* Lists */
+    ul, ol {
+      padding-left: 28px;
+      margin: 16px 0;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    li::marker {
+      color: var(--green-light);
+      font-weight: 700;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+      margin: 40px 0;
+    }
+
+    /* Mermaid Diagrams */
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 32px 0;
+      background: var(--cream);
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .mermaid svg {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 10px;
+      }
+      .container {
+        padding: 28px 20px;
+        border-radius: 12px;
+      }
+      h1 { font-size: 26px; }
+      h2 { font-size: 19px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="ximb-mess-tracker">XIMB Mess Tracker</h1>
+<p><strong>Your mess P&amp;L, sorted. Automatically.</strong></p>
+<blockquote>
+<p>Imagine you eat at your college mess every day. At the end of the month, you get a big bill, but you have no idea what you actually ate or how much you spent each day. That&#39;s the problem this app solves.</p>
+<p><strong>XIMB Mess Tracker watches your email inbox, finds your mess invoices, reads them like a human would, and builds your daily spending diary, all by itself.</strong> You just sign in. That&#39;s it.</p>
+</blockquote>
+<hr>
+<h2 id="what-does-it-do">What Does It Do?</h2>
+<p>Think of this app like a <strong>smart diary that writes itself</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>What you used to do manually</th>
+<th>What the app does automatically</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Open emails, find invoices</td>
+<td><strong>Scans your Gmail</strong> for invoice emails</td>
+</tr>
+<tr>
+<td>Open each PDF, read line items</td>
+<td><strong>Reads the PDF</strong> and extracts every item</td>
+</tr>
+<tr>
+<td>Write down &quot;Dal, Rs 30, Rice, Rs 20&quot;</td>
+<td><strong>Logs each item</strong> with date, name, and price</td>
+</tr>
+<tr>
+<td>Add up daily totals on a calculator</td>
+<td><strong>Auto-calculates</strong> daily, monthly, and payable totals</td>
+</tr>
+<tr>
+<td>Do this every single day</td>
+<td><strong>Runs every day by itself</strong> (even while you sleep)</td>
+</tr>
+</tbody></table>
+<p><strong>Zero manual work. Zero missed invoices. Zero math errors.</strong></p>
+<hr>
+<h2 id="the-automation-pipeline">The Automation Pipeline</h2>
+<p>This is the heart of the app. A fully automated pipeline that turns messy emails into clean financial data.</p>
+<h3 id="how-it-works-like-explaining-to-a-5-year-old">How It Works (Like Explaining to a 5-Year-Old)</h3>
+<ol>
+<li><strong>You get an email.</strong> The mess canteen sends you an invoice PDF to your Gmail.</li>
+<li><strong>The app checks your mailbox.</strong> Every day (or when you press &quot;sync now&quot;), it opens your Gmail and looks for emails from the mess canteen.</li>
+<li><strong>It grabs the PDF attachment.</strong> If the email has a file called <code>invoice-something.pdf</code>, it downloads it.</li>
+<li><strong>It reads the PDF like a human.</strong> The parser opens the PDF, finds the date, finds each food item and its price, and understands the table structure.</li>
+<li><strong>It saves everything.</strong> Each item (like &quot;Paneer Butter Masala, Rs 45&quot;) gets saved to your personal database.</li>
+<li><strong>You see your spending.</strong> Open the app and your entire month&#39;s spending is laid out, day by day, item by item.</li>
+</ol>
+<p><strong>You didn&#39;t lift a finger.</strong></p>
+<hr>
+<h2 id="tech-stack">Tech Stack</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Frontend</strong></td>
+<td>Next.js 16 + React 19</td>
+<td>Fast, modern, works on phones</td>
+</tr>
+<tr>
+<td><strong>Styling</strong></td>
+<td>Tailwind CSS 4 + HeroUI</td>
+<td>Beautiful, responsive design</td>
+</tr>
+<tr>
+<td><strong>Auth</strong></td>
+<td>Supabase Auth (Google OAuth + PKCE)</td>
+<td>Secure sign-in with Google</td>
+</tr>
+<tr>
+<td><strong>Database</strong></td>
+<td>Supabase (PostgreSQL)</td>
+<td>Real-time, row-level security</td>
+</tr>
+<tr>
+<td><strong>Gmail API</strong></td>
+<td>Google Gmail REST API</td>
+<td>Reads invoice emails automatically</td>
+</tr>
+<tr>
+<td><strong>PDF Parser</strong></td>
+<td>unpdf (serverless)</td>
+<td>Extracts text from invoice PDFs</td>
+</tr>
+<tr>
+<td><strong>Encryption</strong></td>
+<td>AES-256-GCM</td>
+<td>Gmail tokens encrypted at rest</td>
+</tr>
+<tr>
+<td><strong>Hosting</strong></td>
+<td>Vercel (Serverless)</td>
+<td>Auto-scales, edge-fast</td>
+</tr>
+<tr>
+<td><strong>Cron Jobs</strong></td>
+<td>Vercel Cron</td>
+<td>Daily background sync for all users</td>
+</tr>
+<tr>
+<td><strong>Analytics</strong></td>
+<td>PostHog (self-hosted proxy)</td>
+<td>Privacy-respecting usage tracking</td>
+</tr>
+<tr>
+<td><strong>Real-time</strong></td>
+<td>Supabase Realtime</td>
+<td>Live updates across devices</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="project-structure">Project Structure</h2>
+<pre><code>ximb-mess-tracker/
+├── app/
+│   ├── page.tsx                    # Main dashboard (the whole UI)
+│   ├── layout.tsx                  # Root layout with SEO meta
+│   ├── globals.css                 # Design system &amp; styles
+│   ├── GmailSync.tsx               # Gmail auto-sync UI component
+│   ├── providers.tsx               # PostHog analytics provider
+│   ├── PostHogPageView.tsx         # Page view tracking
+│   ├── api/
+│   │   ├── gmail/
+│   │   │   ├── sync/route.ts       # Sync one user&#39;s Gmail (on-demand)
+│   │   │   ├── sync-all/route.ts   # Cron: sync ALL users (daily)
+│   │   │   └── store-token/route.ts # Save encrypted Gmail token
+│   │   └── parse-invoice/route.ts  # Manual PDF upload parser
+│   └── utils/
+│       ├── gmail.ts                # Gmail API helpers (fetch, download PDFs)
+│       ├── gmailSync.ts            # Core sync engine (Gmail to DB pipeline)
+│       ├── invoiceParser.ts        # PDF text extraction &amp; item parsing
+│       ├── crypto.ts               # AES-256-GCM encrypt/decrypt
+│       ├── supabaseAdmin.ts        # Server-side Supabase client
+│       └── supabaseClient.ts       # Client-side Supabase client
+├── vercel.json                     # Cron schedule config
+├── supabase_schema.sql             # Purchases + settings tables
+├── supabase_gmail.sql              # Gmail tokens table + realtime
+└── package.json
+</code></pre>
+<hr>
+<h2 id="environment-variables">Environment Variables</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>What It Does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>NEXT_PUBLIC_SUPABASE_URL</code></td>
+<td>Your Supabase project URL</td>
+</tr>
+<tr>
+<td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td>
+<td>Public Supabase key (safe for browsers)</td>
+</tr>
+<tr>
+<td><code>SUPABASE_SERVICE_ROLE_KEY</code></td>
+<td>Secret Supabase key (server-only, bypasses RLS)</td>
+</tr>
+<tr>
+<td><code>GOOGLE_CLIENT_ID</code></td>
+<td>Google OAuth client ID</td>
+</tr>
+<tr>
+<td><code>GOOGLE_CLIENT_SECRET</code></td>
+<td>Google OAuth client secret</td>
+</tr>
+<tr>
+<td><code>GMAIL_TOKEN_KEY</code></td>
+<td>64-char hex key for encrypting Gmail tokens at rest</td>
+</tr>
+<tr>
+<td><code>CRON_SECRET</code></td>
+<td>Secret for authenticating Vercel Cron jobs</td>
+</tr>
+</tbody></table>
+<h3 id="generate-gmail_token_key">Generate <code>GMAIL_TOKEN_KEY</code></h3>
+<pre><code class="language-bash"># Option 1: OpenSSL
+openssl rand -hex 32
+
+# Option 2: Node.js
+node -e &quot;console.log(require(&#39;crypto&#39;).randomBytes(32).toString(&#39;hex&#39;))&quot;
+</code></pre>
+<hr>
+<h2 id="getting-started">Getting Started</h2>
+<h3 id="1-clone--install">1. Clone &amp; Install</h3>
+<pre><code class="language-bash">git clone https://github.com/rajpal07/ximb-mess-tracker.git
+cd ximb-mess-tracker
+npm install
+</code></pre>
+<h3 id="2-set-up-supabase">2. Set Up Supabase</h3>
+<ol>
+<li>Create a project at <a href="https://supabase.com">supabase.com</a></li>
+<li>Run <code>supabase_schema.sql</code> in the SQL Editor (creates <code>purchases</code> and <code>settings</code> tables)</li>
+<li>Run <code>supabase_gmail.sql</code> in the SQL Editor (creates <code>gmail_tokens</code> table + realtime)</li>
+<li>Enable <strong>Google</strong> auth provider under Authentication &gt; Providers</li>
+<li>Copy your project URL, anon key, and service role key</li>
+</ol>
+<h3 id="3-set-up-google-oauth">3. Set Up Google OAuth</h3>
+<ol>
+<li>Go to <a href="https://console.cloud.google.com">Google Cloud Console</a></li>
+<li>Create OAuth 2.0 credentials (Web Application)</li>
+<li>Add authorized redirect URI: <code>https://&lt;your-supabase-project&gt;.supabase.co/auth/v1/callback</code></li>
+<li>Enable the <strong>Gmail API</strong> in your Google Cloud project</li>
+<li>Copy your client ID and client secret</li>
+</ol>
+<h3 id="4-configure-environment">4. Configure Environment</h3>
+<pre><code class="language-bash">cp .env.local.example .env.local
+# Fill in all the values from steps 2 and 3
+</code></pre>
+<h3 id="5-run-locally">5. Run Locally</h3>
+<pre><code class="language-bash">npm run dev
+</code></pre>
+<p>Open <a href="http://localhost:3000">http://localhost:3000</a> and sign in with Google.</p>
+<hr>
+<h2 id="how-gmail-auto-sync-works-technical">How Gmail Auto-Sync Works (Technical)</h2>
+<pre><code>┌─────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────┐
+│  User signs  │────&gt;│ Google OAuth  │────&gt;│ Refresh token │────&gt;│ Encrypted │
+│  in with     │     │ returns       │     │ captured by   │     │ &amp; stored  │
+│  Google      │     │ refresh_token │     │ GmailSync.tsx │     │ in DB     │
+└─────────────┘     └──────────────┘     └──────────────┘     └──────────┘
+                                                                      │
+                    ┌─────────────────────────────────────────────────┘
+                    v
+              ┌──────────┐     ┌──────────────┐     ┌──────────────┐
+              │ Decrypt   │────&gt;│ Gmail API:    │────&gt;│ Download     │
+              │ refresh   │     │ search for    │     │ invoice*.pdf │
+              │ token     │     │ invoice emails│     │ attachments  │
+              └──────────┘     └──────────────┘     └──────────────┘
+                                                            │
+                    ┌───────────────────────────────────────┘
+                    v
+              ┌──────────────┐     ┌──────────────┐     ┌──────────┐
+              │ PDF parser:   │────&gt;│ Extract date, │────&gt;│ Upsert    │
+              │ unpdf reads   │     │ item names,   │     │ into      │
+              │ the text      │     │ prices        │     │ purchases │
+              └──────────────┘     └──────────────┘     └──────────┘
+</code></pre>
+<p><strong>Three sync triggers:</strong></p>
+<ol>
+<li><strong>On page load</strong> - syncs when you open the app</li>
+<li><strong>Every 60 seconds</strong> - polls while the tab is open</li>
+<li><strong>Daily cron</strong> - Vercel Cron hits <code>/api/gmail/sync-all</code> at midnight for ALL users</li>
+</ol>
+<hr>
+<h2 id="features">Features</h2>
+<ul>
+<li><strong>One-click Google sign-in</strong> - No passwords, no registration forms</li>
+<li><strong>Gmail auto-sync</strong> - Invoices are found and parsed automatically</li>
+<li><strong>Manual PDF upload</strong> - Drag &amp; drop invoices if you prefer</li>
+<li><strong>Manual entry</strong> - Add custom items by hand</li>
+<li><strong>Daily breakdown</strong> - See fixed costs + variable extras for each day</li>
+<li><strong>Monthly P&amp;L</strong> - Total spent, advance paid, payable balance</li>
+<li><strong>Mobile-first</strong> - Works beautifully on phones with expandable cards</li>
+<li><strong>Push notifications</strong> - Get notified when new invoices are synced</li>
+<li><strong>Real-time</strong> - Changes sync across all your devices instantly</li>
+<li><strong>Secure</strong> - Row-level security, encrypted tokens, PKCE auth flow</li>
+</ul>
+<hr>
+<h2 id="license">License</h2>
+<p>MIT</p>
+<hr>
+<p align="center">
+  <b>Built for XIMB students who are tired of doing mess math by hand.</b><br>
+  <i>Let the robots handle the boring stuff.</i>
+</p>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'neutral',
+        securityLevel: 'loose',
+        flowchart: { curve: 'basis' }
+      });
+      await mermaid.run();
+    });
+  </script>
+</body>
+</html>
