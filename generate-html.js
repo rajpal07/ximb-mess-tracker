@@ -15,7 +15,9 @@ function processMermaidInHtml(html) {
     /<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/gi,
     (match, code) => {
       const cleanCode = unescapeHtml(code.trim());
-      return `<div class="mermaid">\n${cleanCode}\n</div>`;
+      return `<div class="mermaid-container">
+        <div class="mermaid">${cleanCode}</div>
+      </div>`;
     }
   );
 }
@@ -34,6 +36,7 @@ function createStandaloneHtml(title, markdownContent) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
   <style>
     :root {
       --green-dark: #16321e;
@@ -64,7 +67,7 @@ function createStandaloneHtml(title, markdownContent) {
     }
 
     .container {
-      max-width: 920px;
+      max-width: 960px;
       margin: 0 auto;
       background: var(--card-bg);
       padding: 56px 64px;
@@ -244,22 +247,65 @@ function createStandaloneHtml(title, markdownContent) {
       margin: 40px 0;
     }
 
-    /* Mermaid Diagrams */
+    /* Interactive Mermaid Diagram Container */
+    .mermaid-container {
+      position: relative;
+      margin: 32px 0;
+      background: var(--cream);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .mermaid-hint {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.85);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      pointer-events: none;
+      z-index: 10;
+    }
+
     .mermaid {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 32px 0;
-      background: var(--cream);
-      padding: 24px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      overflow-x: auto;
+      padding: 20px;
+      min-height: 240px;
+      width: 100%;
+      cursor: grab;
+    }
+
+    .mermaid:active {
+      cursor: grabbing;
     }
 
     .mermaid svg {
-      max-width: 100% !important;
-      height: auto !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 220px;
+    }
+
+    /* Node Hover Highlight Effects */
+    .mermaid .node:hover rect,
+    .mermaid .node:hover circle,
+    .mermaid .node:hover polygon {
+      stroke: var(--green-dark) !important;
+      stroke-width: 3px !important;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+      transition: all 0.2s ease;
+    }
+
+    /* Pan-Zoom Controls Style */
+    #svg-pan-zoom-controls {
+      transform: scale(0.85);
+      transform-origin: 100% 100%;
     }
 
     /* Responsive */
@@ -289,7 +335,31 @@ function createStandaloneHtml(title, markdownContent) {
         securityLevel: 'loose',
         flowchart: { curve: 'basis' }
       });
+      
       await mermaid.run();
+
+      // Attach pan-zoom controls to all rendered Mermaid SVG diagrams
+      document.querySelectorAll('.mermaid-container').forEach((container) => {
+        const hint = document.createElement('div');
+        hint.className = 'mermaid-hint';
+        hint.innerText = 'Drag to pan · Scroll to zoom';
+        container.appendChild(hint);
+
+        const svg = container.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('width', '100%');
+          svg.setAttribute('height', '100%');
+          svgPanZoom(svg, {
+            zoomEnabled: true,
+            controlIconsEnabled: true,
+            fit: true,
+            center: true,
+            minZoom: 0.5,
+            maxZoom: 10,
+            zoomScaleSensitivity: 0.2
+          });
+        }
+      });
     });
   </script>
 </body>
@@ -297,13 +367,13 @@ function createStandaloneHtml(title, markdownContent) {
 }
 
 function main() {
-  console.log('Generating PRD.html...');
+  console.log('Generating interactive PRD.html...');
   const prdMd = fs.readFileSync('PRD.md', 'utf-8');
   const prdHtml = createStandaloneHtml('XIMB Mess Tracker - Product Requirements Document', prdMd);
   fs.writeFileSync('PRD.html', prdHtml);
   console.log('PRD.html generated successfully!');
 
-  console.log('Generating README.html...');
+  console.log('Generating interactive README.html...');
   const readmeMd = fs.readFileSync('README.md', 'utf-8');
   const readmeHtml = createStandaloneHtml('XIMB Mess Tracker - Documentation', readmeMd);
   fs.writeFileSync('README.html', readmeHtml);

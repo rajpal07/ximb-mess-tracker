@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
   <style>
     :root {
       --green-dark: #16321e;
@@ -38,7 +39,7 @@
     }
 
     .container {
-      max-width: 920px;
+      max-width: 960px;
       margin: 0 auto;
       background: var(--card-bg);
       padding: 56px 64px;
@@ -218,22 +219,65 @@
       margin: 40px 0;
     }
 
-    /* Mermaid Diagrams */
+    /* Interactive Mermaid Diagram Container */
+    .mermaid-container {
+      position: relative;
+      margin: 32px 0;
+      background: var(--cream);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .mermaid-hint {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.85);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      pointer-events: none;
+      z-index: 10;
+    }
+
     .mermaid {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 32px 0;
-      background: var(--cream);
-      padding: 24px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      overflow-x: auto;
+      padding: 20px;
+      min-height: 240px;
+      width: 100%;
+      cursor: grab;
+    }
+
+    .mermaid:active {
+      cursor: grabbing;
     }
 
     .mermaid svg {
-      max-width: 100% !important;
-      height: auto !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 220px;
+    }
+
+    /* Node Hover Highlight Effects */
+    .mermaid .node:hover rect,
+    .mermaid .node:hover circle,
+    .mermaid .node:hover polygon {
+      stroke: var(--green-dark) !important;
+      stroke-width: 3px !important;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+      transition: all 0.2s ease;
+    }
+
+    /* Pan-Zoom Controls Style */
+    #svg-pan-zoom-controls {
+      transform: scale(0.85);
+      transform-origin: 100% 100%;
     }
 
     /* Responsive */
@@ -319,8 +363,8 @@
 <h2 id="3-automation-architecture">3. Automation Architecture</h2>
 <p>This is the core differentiator. <strong>Everything is automated.</strong> Here&#39;s the complete system:</p>
 <h3 id="31-high-level-system-architecture">3.1 High-Level System Architecture</h3>
-<div class="mermaid">
-graph TB
+<div class="mermaid-container">
+        <div class="mermaid">graph TB
     subgraph UserLayer ["User Layer"]
         A["Student opens app"]
         B["Signs in with Google"]
@@ -360,12 +404,12 @@ graph TB
     style C fill:#4c8a3f,color:#fff
     style D fill:#4c8a3f,color:#fff
     style E fill:#4c8a3f,color:#fff
-    style F fill:#4c8a3f,color:#fff
-</div>
+    style F fill:#4c8a3f,color:#fff</div>
+      </div>
 <h3 id="32-the-automation-pipeline-detailed-flow">3.2 The Automation Pipeline (Detailed Flow)</h3>
 <p>This is the step-by-step journey of an invoice from email to dashboard:</p>
-<div class="mermaid">
-flowchart TD
+<div class="mermaid-container">
+        <div class="mermaid">flowchart TD
     A["Mess canteen sends invoice email"] --> B["Gmail API: Search for emails"]
     B --> C{"Found emails with<br/>invoice PDF files?"}
     C -->|No| D["Already up to date"]
@@ -389,15 +433,15 @@ flowchart TD
     style H fill:#4c8a3f,color:#fff
     style J fill:#4c8a3f,color:#fff
     style L fill:#4c8a3f,color:#fff
-    style N fill:#2a4a2e,color:#fff
-</div>
+    style N fill:#2a4a2e,color:#fff</div>
+      </div>
 <blockquote>
 <p><strong>Green boxes = Automated by code (no human involved)</strong></p>
 <p><strong>Orange box = The only external trigger (an email arriving)</strong></p>
 </blockquote>
 <h3 id="33-authentication--security-flow">3.3 Authentication &amp; Security Flow</h3>
-<div class="mermaid">
-sequenceDiagram
+<div class="mermaid-container">
+        <div class="mermaid">sequenceDiagram
     participant User
     participant App
     participant Google
@@ -423,12 +467,12 @@ sequenceDiagram
     App->>GmailAPI: Fetch invoice emails
     GmailAPI->>App: Email list + PDF attachments
     App->>App: Parse PDFs, extract items
-    App->>Supabase: Upsert purchases
-</div>
+    App->>Supabase: Upsert purchases</div>
+      </div>
 <h3 id="34-three-sync-triggers">3.4 Three Sync Triggers</h3>
 <p>The automation doesn&#39;t just run once. It runs through <strong>three different triggers</strong>:</p>
-<div class="mermaid">
-graph LR
+<div class="mermaid-container">
+        <div class="mermaid">graph LR
     subgraph Trigger1 ["Trigger 1: Page Load"]
         A1["User opens app"] --> A2["Immediate sync"]
     end
@@ -448,8 +492,8 @@ graph LR
     C3 --> D
 
     style D fill:#4c8a3f,color:#fff
-    style C3 fill:#e08a2e,color:#fff
-</div>
+    style C3 fill:#e08a2e,color:#fff</div>
+      </div>
 <table>
 <thead>
 <tr>
@@ -481,8 +525,8 @@ graph LR
 <hr>
 <h2 id="4-data-model">4. Data Model</h2>
 <h3 id="41-entity-relationship-diagram">4.1 Entity Relationship Diagram</h3>
-<div class="mermaid">
-erDiagram
+<div class="mermaid-container">
+        <div class="mermaid">erDiagram
     AUTH_USERS ||--o{ PURCHASES : "has many"
     AUTH_USERS ||--o| SETTINGS : "has one"
     AUTH_USERS ||--o| GMAIL_TOKENS : "has one"
@@ -518,8 +562,8 @@ erDiagram
         timestamp last_synced_at
         boolean backfill_done
         timestamp updated_at
-    }
-</div>
+    }</div>
+      </div>
 <h3 id="42-table-details">4.2 Table Details</h3>
 <h4 id="purchases---every-food-item-you-bought"><code>purchases</code> - Every food item you bought</h4>
 <table>
@@ -601,8 +645,8 @@ erDiagram
 <h2 id="5-automation-deep-dive">5. Automation Deep Dive</h2>
 <h3 id="51-pdf-invoice-parsing-engine">5.1 PDF Invoice Parsing Engine</h3>
 <p>The parser is the &quot;brain&quot; of the system. It takes raw PDF bytes and produces structured data.</p>
-<div class="mermaid">
-flowchart TD
+<div class="mermaid-container">
+        <div class="mermaid">flowchart TD
     A["Raw PDF bytes"] --> B["unpdf: getDocumentProxy"]
     B --> C["unpdf: extractText"]
     C --> D["Normalize whitespace"]
@@ -619,8 +663,8 @@ flowchart TD
     style B fill:#4c8a3f,color:#fff
     style C fill:#4c8a3f,color:#fff
     style H fill:#4c8a3f,color:#fff
-    style J fill:#4c8a3f,color:#fff
-</div>
+    style J fill:#4c8a3f,color:#fff</div>
+      </div>
 <p><strong>What the parser understands:</strong></p>
 <pre><code>Input PDF text (simplified):
 &quot;Invoice Date: 15-07-2026 ... 1 PANEER BUTTER MASALA 2 2.0PC ... 90.00 ... 2 COLD DRINK 1 1.0PC ... 30.00&quot;
@@ -632,8 +676,8 @@ Output:
 ]
 </code></pre>
 <h3 id="52-gmail-scanning-engine">5.2 Gmail Scanning Engine</h3>
-<div class="mermaid">
-flowchart TD
+<div class="mermaid-container">
+        <div class="mermaid">flowchart TD
     A["Start: accessTokenFor refreshToken"] --> B{"Token cached<br/>& not expired?"}
     B -->|Yes| C["Use cached access token"]
     B -->|No| D["POST oauth2.googleapis.com/token"]
@@ -654,15 +698,15 @@ flowchart TD
     style D fill:#4c8a3f,color:#fff
     style J fill:#4c8a3f,color:#fff
     style M fill:#4c8a3f,color:#fff
-    style N fill:#4c8a3f,color:#fff
-</div>
+    style N fill:#4c8a3f,color:#fff</div>
+      </div>
 <p><strong>Search query used:</strong></p>
 <pre><code>from:(noreply@wepsol.com) has:attachment filename:pdf
 </code></pre>
 <p><strong>Rate limiting:</strong> Messages are processed in chunks of 10 to stay under Gmail&#39;s per-user API quota.</p>
 <h3 id="53-encryption-system">5.3 Encryption System</h3>
-<div class="mermaid">
-flowchart LR
+<div class="mermaid-container">
+        <div class="mermaid">flowchart LR
     subgraph EncryptStore ["Encrypt (store-token)"]
         A["Plain refresh_token"] --> B["Generate random 12-byte IV"]
         B --> C["AES-256-GCM encrypt"]
@@ -674,8 +718,8 @@ flowchart LR
         F --> G["Base64 decode each part"]
         G --> H["AES-256-GCM decrypt"]
         H --> I["Plain refresh_token"]
-    end
-</div>
+    end</div>
+      </div>
 <p><strong>Why AES-256-GCM?</strong></p>
 <ul>
 <li><strong>AES-256</strong> = Military-grade encryption (even governments use this)</li>
@@ -685,8 +729,8 @@ flowchart LR
 <hr>
 <h2 id="6-user-interface">6. User Interface</h2>
 <h3 id="61-screen-flow">6.1 Screen Flow</h3>
-<div class="mermaid">
-flowchart TD
+<div class="mermaid-container">
+        <div class="mermaid">flowchart TD
     A["App loads"] --> B{"User signed in?"}
     B -->|No| C["Login Screen<br/>'Sign in with Google'"]
     B -->|Yes| D["Dashboard"]
@@ -705,8 +749,8 @@ flowchart TD
     F1 -->|Yes| F3["Auto-syncing...<br/>Status: up to date, 3:45 PM"]
   
     I --> I1["Desktop: Full table<br/>with expandable rows"]
-    I --> I2["Mobile: Card list<br/>with collapsible items"]
-</div>
+    I --> I2["Mobile: Card list<br/>with collapsible items"]</div>
+      </div>
 <h3 id="62-key-ui-components">6.2 Key UI Components</h3>
 <table>
 <thead>
@@ -745,8 +789,8 @@ flowchart TD
 <hr>
 <h2 id="7-security-model">7. Security Model</h2>
 <h3 id="71-defense-in-depth">7.1 Defense in Depth</h3>
-<div class="mermaid">
-graph TD
+<div class="mermaid-container">
+        <div class="mermaid">graph TD
     subgraph Layer1 ["Layer 1: Authentication"]
         A["Google OAuth 2.0 + PKCE"]
         B["No passwords stored"]
@@ -772,8 +816,8 @@ graph TD
     B --> D --> F --> H
 
     style E fill:#c94f36,color:#fff
-    style F fill:#c94f36,color:#fff
-</div>
+    style F fill:#c94f36,color:#fff</div>
+      </div>
 <h3 id="72-key-security-decisions">7.2 Key Security Decisions</h3>
 <table>
 <thead>
@@ -995,7 +1039,31 @@ Rejected: receipt.pdf, menu.pdf, photo.jpg
         securityLevel: 'loose',
         flowchart: { curve: 'basis' }
       });
+      
       await mermaid.run();
+
+      // Attach pan-zoom controls to all rendered Mermaid SVG diagrams
+      document.querySelectorAll('.mermaid-container').forEach((container) => {
+        const hint = document.createElement('div');
+        hint.className = 'mermaid-hint';
+        hint.innerText = 'Drag to pan · Scroll to zoom';
+        container.appendChild(hint);
+
+        const svg = container.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('width', '100%');
+          svg.setAttribute('height', '100%');
+          svgPanZoom(svg, {
+            zoomEnabled: true,
+            controlIconsEnabled: true,
+            fit: true,
+            center: true,
+            minZoom: 0.5,
+            maxZoom: 10,
+            zoomScaleSensitivity: 0.2
+          });
+        }
+      });
     });
   </script>
 </body>
