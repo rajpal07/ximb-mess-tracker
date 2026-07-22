@@ -12,7 +12,6 @@ function unescapeHtml(html) {
 }
 
 function processMermaidInHtml(html) {
-  // Replace <pre><code class="language-mermaid">...</code></pre> with clean <div class="mermaid">...</div>
   return html.replace(
     /<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/gi,
     (match, code) => {
@@ -36,32 +35,18 @@ async function generatePdf(inputFile, outputFile) {
   <meta charset="utf-8">
   <style>
     ${css}
-    .mermaid {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 18px 0;
-      background: #fdfbf5;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #d9d1bc;
-      page-break-inside: avoid;
-    }
-    .mermaid svg {
-      max-width: 100% !important;
-      height: auto !important;
-    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
-<body class="markdown-body">
+<body>
   ${bodyHtml}
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       mermaid.initialize({
         startOnLoad: true,
         theme: 'neutral',
-        securityLevel: 'loose'
+        securityLevel: 'loose',
+        flowchart: { curve: 'basis' }
       });
       await mermaid.run();
     });
@@ -76,17 +61,17 @@ async function generatePdf(inputFile, outputFile) {
   });
 
   const page = await browser.newPage();
-  
+
   page.on('console', (msg) => {
     if (msg.type() === 'error') console.log('PAGE ERROR:', msg.text());
   });
 
   await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
-  // Wait for all mermaid diagrams to render SVGs
+  // Wait for mermaid diagrams to render into SVGs
   try {
     await page.waitForSelector('.mermaid svg', { timeout: 10000 });
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 1200));
   } catch (e) {
     console.warn('Warning: No mermaid SVG selector found or timeout waiting for mermaid');
   }
