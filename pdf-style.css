@@ -1,4 +1,4 @@
-/* Edge-to-edge Document Stylesheet for PDF Generation */
+/* Edge-to-edge Document Stylesheet for PDF & Web HTML Generation */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -95,6 +95,13 @@ blockquote p:last-child {
 }
 
 /* Tables */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin: 16px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -187,10 +194,39 @@ hr {
   padding: 16px;
   border-radius: 8px;
   border: 1px solid var(--border-color);
+  overflow-x: auto;
   page-break-inside: avoid;
 }
 
 .mermaid svg {
   max-width: 100% !important;
   height: auto !important;
+}
+
+/* Mobile Responsiveness for Web Browsing */
+@media (max-width: 768px) {
+  body {
+    font-size: 10pt;
+    padding: 20px 16px !important;
+  }
+  h1 { font-size: 19pt; }
+  h2 { font-size: 14pt; margin-top: 24px; }
+  h3 { font-size: 12pt; margin-top: 18px; }
+  .mermaid {
+    padding: 10px;
+    justify-content: flex-start;
+  }
+  table {
+    font-size: 8.5pt;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  th, td {
+    padding: 6px 10px;
+  }
+  pre {
+    padding: 12px 14px;
+    font-size: 8pt;
+  }
 }

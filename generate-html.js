@@ -1,5 +1,6 @@
 import { marked } from 'marked';
 import fs from 'fs';
+import path from 'path';
 
 function unescapeHtml(html) {
   return html
@@ -39,7 +40,7 @@ function createStandaloneHtml(title, markdownContent) {
     ${css}
     
     body {
-      max-width: 960px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 40px 24px;
       background: #ffffff;
@@ -69,12 +70,26 @@ function main() {
   const prdMd = fs.readFileSync('PRD.md', 'utf-8');
   const prdHtml = createStandaloneHtml('XIMB Mess Tracker - Product Requirements Document', prdMd);
   fs.writeFileSync('PRD.html', prdHtml);
-  console.log('PRD.html generated successfully!');
+
+  // Copy to public/ for Next.js static serving
+  if (!fs.existsSync('public')) {
+    fs.mkdirSync('public', { recursive: true });
+  }
+  fs.writeFileSync('public/prd.html', prdHtml);
+  
+  const publicPrdDir = 'public/prd';
+  if (!fs.existsSync(publicPrdDir)) {
+    fs.mkdirSync(publicPrdDir, { recursive: true });
+  }
+  fs.writeFileSync(path.join(publicPrdDir, 'index.html'), prdHtml);
+
+  console.log('PRD.html generated in root and public/ folder!');
 
   console.log('Generating README.html...');
   const readmeMd = fs.readFileSync('README.md', 'utf-8');
   const readmeHtml = createStandaloneHtml('XIMB Mess Tracker - Documentation', readmeMd);
   fs.writeFileSync('README.html', readmeHtml);
+  fs.writeFileSync('public/readme.html', readmeHtml);
   console.log('README.html generated successfully!');
 }
 
