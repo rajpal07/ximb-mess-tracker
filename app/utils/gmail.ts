@@ -1,6 +1,6 @@
 // Gmail REST helpers (server only). Plain fetch — no googleapis dependency.
 
-export const INVOICE_SENDERS = ["noreply@wepsol.com", "asuresh767@gmail.com"];
+export const INVOICE_SENDERS = ["noreply@wepsol.com"];
 
 export const GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
 
