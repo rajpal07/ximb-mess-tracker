@@ -1,0 +1,254 @@
+/* Premium PDF stylesheet for XIMB Mess Tracker docs */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --green-dark: #16321e;
+  --green-mid: #2a4a2e;
+  --green-light: #4c8a3f;
+  --cream: #fdfbf5;
+  --cream-dark: #f4efe4;
+  --text-primary: #1f2a1c;
+  --text-secondary: #5c6a54;
+  --border: #d9d1bc;
+  --accent: #e08a2e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11pt;
+  line-height: 1.7;
+  color: var(--text-primary);
+  background: white;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+/* Headings */
+h1 {
+  font-size: 28pt;
+  font-weight: 800;
+  color: var(--green-dark);
+  margin-top: 0;
+  margin-bottom: 8px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--green-dark);
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  font-size: 18pt;
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-top: 36px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1.5px solid var(--border);
+  letter-spacing: -0.3px;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-size: 14pt;
+  font-weight: 600;
+  color: var(--green-mid);
+  margin-top: 28px;
+  margin-bottom: 8px;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-size: 12pt;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 20px;
+  margin-bottom: 6px;
+  page-break-after: avoid;
+}
+
+/* Paragraphs */
+p {
+  margin-bottom: 10px;
+  orphans: 3;
+  widows: 3;
+}
+
+strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Links */
+a {
+  color: var(--green-light);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Blockquotes */
+blockquote {
+  border-left: 4px solid var(--green-light);
+  background: var(--cream);
+  margin: 16px 0;
+  padding: 14px 20px;
+  border-radius: 0 8px 8px 0;
+  font-size: 10.5pt;
+  color: var(--text-secondary);
+}
+
+blockquote p {
+  margin-bottom: 6px;
+}
+
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+blockquote strong {
+  color: var(--text-primary);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 10pt;
+  page-break-inside: auto;
+}
+
+thead {
+  background: var(--green-dark);
+  color: white;
+}
+
+th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 9.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+tbody tr:nth-child(even) {
+  background: var(--cream);
+}
+
+tbody tr:hover {
+  background: var(--cream-dark);
+}
+
+/* Code blocks */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 9pt;
+  background: var(--cream-dark);
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: var(--green-dark);
+  font-weight: 500;
+}
+
+pre {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  padding: 18px 22px;
+  border-radius: 10px;
+  overflow-x: auto;
+  font-size: 9pt;
+  line-height: 1.6;
+  margin: 14px 0;
+  page-break-inside: avoid;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+  font-weight: 400;
+}
+
+/* Lists */
+ul, ol {
+  padding-left: 24px;
+  margin: 8px 0;
+}
+
+li {
+  margin-bottom: 4px;
+  line-height: 1.6;
+}
+
+li::marker {
+  color: var(--green-light);
+  font-weight: 700;
+}
+
+/* Horizontal rules */
+hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+  margin: 32px 0;
+}
+
+/* Mermaid diagrams */
+.mermaid {
+  text-align: center;
+  margin: 20px 0;
+  page-break-inside: avoid;
+}
+
+.mermaid svg {
+  max-width: 100%;
+}
+
+/* ASCII art / diagram blocks */
+pre:not([class]) {
+  background: var(--cream);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 8.5pt;
+}
+
+/* Page break control */
+h2 {
+  page-break-before: auto;
+}
+
+/* Print optimizations */
+@media print {
+  body {
+    font-size: 10.5pt;
+  }
+
+  h1 {
+    font-size: 24pt;
+  }
+
+  h2 {
+    font-size: 16pt;
+  }
+
+  pre {
+    font-size: 8.5pt;
+  }
+
+  table {
+    font-size: 9pt;
+  }
+}
