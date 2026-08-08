@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/app/utils/supabaseAdmin";
-import { syncGmailForUser, type GmailTokenRow } from "@/app/utils/gmailSync";
+import { syncGmailForUser, TOKEN_COLUMNS, type GmailTokenRow } from "@/app/utils/gmailSync";
 
 export const maxDuration = 60;
 
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   const admin = createAdminClient();
   const { data: rows, error } = await admin
     .from("gmail_tokens")
-    .select("user_id, refresh_token, last_synced_at, backfill_done");
+    .select(TOKEN_COLUMNS);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -31,9 +31,9 @@ export async function GET(req: Request) {
       errors += outcome.errors.length;
     } catch (e) {
       errors++;
-      console.error(`gmail sync-all failed for ${row.user_id}:`, e);
+      console.error(`gmail sync-all failed for ${row.user_id} / ${row.email}:`, e);
     }
   }
 
-  return NextResponse.json({ users: rows?.length ?? 0, inserted, errors });
+  return NextResponse.json({ accounts: rows?.length ?? 0, inserted, errors });
 }

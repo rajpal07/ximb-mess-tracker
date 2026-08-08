@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import { createAdminClient, getUserFromRequest } from "@/app/utils/supabaseAdmin";
-import { syncGmailForUser, type GmailTokenRow } from "@/app/utils/gmailSync";
+import {
+  syncGmailForUser,
+  TOKEN_COLUMNS,
+  type GmailTokenRow,
+  type PurchaseRow,
+} from "@/app/utils/gmailSync";
 
 export const maxDuration = 60;
 
-/** Sync the signed-in user's Gmail invoices. Auth: Supabase JWT bearer. */
+/** Sync every Gmail account the signed-in user connected. Auth: Supabase JWT bearer. */
 export async function POST(req: Request) {
   const user = await getUserFromRequest(req);
   if (!user) {
@@ -12,26 +17,39 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient();
-  const { data: row, error } = await admin
+  const { data: rows, error } = await admin
     .from("gmail_tokens")
-    .select("user_id, refresh_token, last_synced_at, backfill_done")
-    .eq("user_id", user.id)
-    .maybeSingle();
+    .select(TOKEN_COLUMNS)
+    .eq("user_id", user.id);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  if (!row) {
-    return NextResponse.json({ status: "not_connected" });
+  if (!rows || rows.length === 0) {
+    return NextResponse.json({ status: "not_connected", accounts: [] });
   }
 
-  try {
-    const url = new URL(req.url);
-    const fullResync = url.searchParams.get("full") === "1";
-    const outcome = await syncGmailForUser(admin, row as GmailTokenRow, fullResync);
-    return NextResponse.json(outcome);
-  } catch (e) {
-    const detail = e instanceof Error ? e.message : String(e);
-    console.error("gmail sync error:", detail);
-    return NextResponse.json({ error: detail }, { status: 500 });
+  const fullResync = new URL(req.url).searchParams.get("full") === "1";
+
+  let scanned = 0;
+  const inserted: PurchaseRow[] = [];
+  const errors: string[] = [];
+  const accounts: { email: string; connected: boolean }[] = [];
+
+  // One mailbox failing must not sink the others.
+  for (const row of rows as GmailTokenRow[]) {
+    try {
+      const outcome = await syncGmailForUser(admin, row, fullResync);
+      scanned += outcome.scanned;
+      inserted.push(...outcome.inserted);
+      errors.push(...outcome.errors.map((m) => `${row.email}: ${m}`));
+      accounts.push({ email: row.email, connected: outcome.status === "ok" });
+    } catch (e) {
+      const detail = e instanceof Error ? e.message : String(e);
+      console.error(`gmail sync error for ${row.email}:`, detail);
+      errors.push(`${row.email}: ${detail}`);
+      accounts.push({ email: row.email, connected: true });
+    }
   }
+
+  return NextResponse.json({ status: "ok", scanned, inserted, errors, accounts });
 }
