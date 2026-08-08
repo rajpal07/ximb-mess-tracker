@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
+import { createCipheriv, createDecipheriv, createHmac, randomBytes, timingSafeEqual } from "crypto";
 
 // AES-256-GCM for Gmail refresh tokens at rest.
 // GMAIL_TOKEN_KEY = 64 hex chars (32 bytes). Generate: `openssl rand -hex 32`
@@ -24,4 +24,34 @@ export function decrypt(payload: string): string {
   const decipher = createDecipheriv("aes-256-gcm", key(), iv);
   decipher.setAuthTag(tag);
   return Buffer.concat([decipher.update(ct), decipher.final()]).toString("utf8");
+}
+
+// OAuth `state` for the extra-Gmail-account flow: the user id has to survive a
+// round trip through Google, so it is HMAC-signed and short-lived.
+const STATE_TTL_MS = 10 * 60_000;
+
+function mac(body: string): string {
+  return createHmac("sha256", key()).update(body).digest("base64url");
+}
+
+export function signState(userId: string): string {
+  const body = Buffer.from(JSON.stringify({ u: userId, e: Date.now() + STATE_TTL_MS })).toString(
+    "base64url",
+  );
+  return `${body}.${mac(body)}`;
+}
+
+/** Returns the user id, or null if the state is forged, malformed, or expired. */
+export function verifyState(state: string): string | null {
+  const [body, sig] = state.split(".");
+  if (!body || !sig) return null;
+  const expected = Buffer.from(mac(body));
+  const got = Buffer.from(sig);
+  if (expected.length !== got.length || !timingSafeEqual(expected, got)) return null;
+  try {
+    const { u, e } = JSON.parse(Buffer.from(body, "base64url").toString());
+    return typeof u === "string" && typeof e === "number" && e > Date.now() ? u : null;
+  } catch {
+    return null;
+  }
 }

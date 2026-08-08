@@ -7,10 +7,14 @@ type AdminClient = ReturnType<typeof createAdminClient>;
 
 export type GmailTokenRow = {
   user_id: string;
+  email: string;
   refresh_token: string;
   last_synced_at: string | null;
   backfill_done: boolean;
 };
+
+/** Columns every caller needs to run a sync. */
+export const TOKEN_COLUMNS = "user_id, email, refresh_token, last_synced_at, backfill_done";
 
 export type PurchaseRow = {
   id: string;
@@ -53,8 +57,12 @@ export async function syncGmailForUser(
     invoices = await fetchInvoicePdfs(decrypt(row.refresh_token), afterEpochSec);
   } catch (e) {
     if (e instanceof GmailAuthError) {
-      // Token revoked — drop it so the UI shows "connect" again.
-      await admin.from("gmail_tokens").delete().eq("user_id", row.user_id);
+      // Token revoked — drop this mailbox so the UI shows "connect" again.
+      await admin
+        .from("gmail_tokens")
+        .delete()
+        .eq("user_id", row.user_id)
+        .eq("email", row.email);
       return { status: "not_connected", scanned: 0, inserted: [], errors: [e.message] };
     }
     throw e;
@@ -106,7 +114,8 @@ export async function syncGmailForUser(
   await admin
     .from("gmail_tokens")
     .update({ last_synced_at: new Date().toISOString(), backfill_done: true })
-    .eq("user_id", row.user_id);
+    .eq("user_id", row.user_id)
+    .eq("email", row.email);
 
   return { status: "ok", scanned: invoices.length, inserted, errors };
 }

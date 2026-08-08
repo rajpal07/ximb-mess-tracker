@@ -4,6 +4,12 @@ export const INVOICE_SENDERS = ["noreply@wepsol.com"];
 
 export const GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
 
+/** Redirect URI for the extra-account OAuth flow. Must be whitelisted in the
+ *  Google Cloud console for every origin the app runs on. */
+export function callbackUrl(req: Request): string {
+  return `${new URL(req.url).origin}/api/gmail/callback`;
+}
+
 export function gmailQuery(afterEpochSec?: number): string {
   const base = `from:(${INVOICE_SENDERS.join(" OR ")}) has:attachment filename:pdf`;
   return afterEpochSec ? `${base} after:${afterEpochSec}` : base;

@@ -30,6 +30,7 @@ type SyncResponse = {
   }[];
   errors?: string[];
   error?: string;
+  accounts?: { email: string; connected: boolean }[];
 };
 
 function notify(items: SyncedPurchase[]) {
@@ -53,6 +54,7 @@ export default function GmailSync({
   const [status, setStatus] = useState<SyncStatus>("checking");
   const [detail, setDetail] = useState("checking gmail connection…");
   const [pendingToken, setPendingToken] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<string[]>([]);
   const syncingRef = useRef(false);
 
   const sync = useCallback(async (full = false) => {
@@ -69,6 +71,8 @@ export default function GmailSync({
         headers: { authorization: `Bearer ${jwt}` },
       });
       const body = (await res.json()) as SyncResponse;
+
+      setAccounts((body.accounts ?? []).map((a) => a.email).filter(Boolean));
 
       if (body.status === "not_connected") {
         setStatus("not_connected");
@@ -138,6 +142,23 @@ export default function GmailSync({
     })();
   }, [pendingToken, sync]);
 
+  // Back from the "add another gmail" consent screen: clear the marker and sync
+  // the freshly connected mailbox right away.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const result = params.get("gmail");
+    if (!result) return;
+    params.delete("gmail");
+    const qs = params.toString();
+    window.history.replaceState({}, "", window.location.pathname + (qs ? `?${qs}` : ""));
+    if (result === "added") {
+      sync();
+    } else {
+      setStatus("error");
+      setDetail(result === "cancelled" ? "gmail connect cancelled" : "gmail connect failed");
+    }
+  }, [sync]);
+
   // Initial sync + poll while the page is open.
   useEffect(() => {
     if (typeof Notification !== "undefined" && Notification.permission === "default") {
@@ -193,6 +214,38 @@ export default function GmailSync({
     });
   }
 
+  // Extra mailboxes go through our own consent flow so the signed-in identity
+  // stays put — only the primary account comes from the Supabase login.
+  async function addAnotherGmail() {
+    const { data } = await supabase.auth.getSession();
+    const jwt = data.session?.access_token;
+    if (!jwt) return;
+    const res = await fetch("/api/gmail/connect", {
+      method: "POST",
+      headers: { authorization: `Bearer ${jwt}` },
+    });
+    const body = (await res.json()) as { url?: string; error?: string };
+    if (body.url) {
+      window.location.href = body.url;
+    } else {
+      setStatus("error");
+      setDetail(body.error ?? "could not start gmail connect");
+    }
+  }
+
+  async function disconnect(email: string) {
+    const { data } = await supabase.auth.getSession();
+    const jwt = data.session?.access_token;
+    if (!jwt) return;
+    await fetch("/api/gmail/disconnect", {
+      method: "POST",
+      headers: { authorization: `Bearer ${jwt}`, "content-type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    setAccounts((prev) => prev.filter((e) => e !== email));
+    sync();
+  }
+
   const dotColor =
     status === "connected" || status === "syncing"
       ? "bg-[#4c8a3f]"
@@ -201,37 +254,73 @@ export default function GmailSync({
         : "bg-[#b9ae90]";
 
   return (
-    <div className="ledger-card mb-5 flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-      <div className="flex min-w-0 items-center gap-2.5">
-        <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} aria-hidden="true"></span>
-        <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">
-            gmail auto-sync
-          </p>
-          <p className="truncate text-xs text-[#8a987e]">{detail}</p>
+    <div className="ledger-card mb-5 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} aria-hidden="true"></span>
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5c6a54]">
+              gmail auto-sync
+            </p>
+            <p className="truncate text-xs text-[#8a987e]">{detail}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {status === "not_connected" ? (
+            <Button
+              size="sm"
+              radius="full"
+              className="bg-[#16321e] px-4 font-semibold text-white shadow-none hover:bg-[#2a4a2e]"
+              onPress={connectGmail}
+            >
+              connect gmail
+            </Button>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                radius="full"
+                variant="flat"
+                className="border border-[#d9d1bc] bg-[#fdfbf5] px-4 text-[#5c6a54]"
+                onPress={addAnotherGmail}
+              >
+                add gmail
+              </Button>
+              <Button
+                size="sm"
+                radius="full"
+                variant="flat"
+                isLoading={status === "syncing" || status === "checking"}
+                className="border border-[#d9d1bc] bg-[#fdfbf5] px-4 text-[#5c6a54]"
+                onPress={() => sync(true)}
+              >
+                sync now
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
-      {status === "not_connected" ? (
-        <Button
-          size="sm"
-          radius="full"
-          className="bg-[#16321e] px-4 font-semibold text-white shadow-none hover:bg-[#2a4a2e]"
-          onPress={connectGmail}
-        >
-          connect gmail
-        </Button>
-      ) : (
-        <Button
-          size="sm"
-          radius="full"
-          variant="flat"
-          isLoading={status === "syncing" || status === "checking"}
-          className="border border-[#d9d1bc] bg-[#fdfbf5] px-4 text-[#5c6a54]"
-          onPress={() => sync(true)}
-        >
-          sync now
-        </Button>
+      {accounts.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-[#e7e0cd] pt-2.5">
+          {accounts.map((email) => (
+            <span
+              key={email}
+              className="flex items-center gap-1 rounded-full border border-[#d9d1bc] bg-[#fdfbf5] py-0.5 pl-2.5 pr-1 text-[11px] text-[#5c6a54]"
+            >
+              {email}
+              <button
+                type="button"
+                aria-label={`disconnect ${email}`}
+                className="px-1 text-[#b9ae90] hover:text-[#c94f36]"
+                onClick={() => disconnect(email)}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
       )}
     </div>
   );

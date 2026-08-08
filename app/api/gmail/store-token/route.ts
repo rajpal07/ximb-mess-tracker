@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const { error } = await admin.from("gmail_tokens").upsert({
     user_id: user.id,
     refresh_token: encrypt(refreshToken),
-    email: user.email ?? null,
+    email: (user.email ?? "").toLowerCase(),
     updated_at: new Date().toISOString(),
   });
   if (error) {
