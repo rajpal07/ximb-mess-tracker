@@ -5,8 +5,8 @@ import { Button, Input } from "@heroui/react";
 import { supabase } from "@/app/utils/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 import GmailSync, { type SyncedPurchase } from "@/app/GmailSync";
+import { DAILY_FIXED_COST, SPECIAL_DINNER_EXTRA, specialDinnerDays } from "@/app/utils/billing";
 
-const DAILY_FIXED_COST = 222;
 const DEFAULT_MESS_START_DATE = "2026-06-15";
 
 type PurchaseRecord = {
@@ -258,7 +258,6 @@ export default function HomePage() {
     return getVisibleDates(selectedMonth, settings.messStartDate).map((date) => {
       const purchases = purchaseMap.get(date) ?? [];
       const variableCost = purchases.reduce((sum, purchase) => sum + purchase.total, 0);
-
       return {
         date,
         fixedCost: DAILY_FIXED_COST,
@@ -272,7 +271,16 @@ export default function HomePage() {
   const summary = useMemo(() => {
     const computedFixedTotal = dailyRows.reduce((sum, row) => sum + row.fixedCost, 0);
     const computedVariableTotal = dailyRows.reduce((sum, row) => sum + row.variableCost, 0);
-    const computedGrandTotal = computedFixedTotal + computedVariableTotal;
+
+    // Special-item nights never appear on a kiosk invoice — the mess just bills
+    // ~4 of them a month, prorated for part-months.
+    const [year, month] = selectedMonth.split("-").map(Number);
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const specialDays = specialDinnerDays(dailyRows.length, daysInMonth);
+    const computedSpecialTotal = specialDays * SPECIAL_DINNER_EXTRA;
+
+    const computedGrandTotal =
+      computedFixedTotal + computedSpecialTotal + computedVariableTotal;
     const advanceCredit = settings.advanceByMonth[selectedMonth] ?? 0;
     const customMonthTotal = settings.customTotalByMonth[selectedMonth] ?? 0;
     const grandTotal = customMonthTotal > 0 ? customMonthTotal : computedGrandTotal;
@@ -283,6 +291,8 @@ export default function HomePage() {
       grandTotal,
       customMonthTotal,
       advanceCredit,
+      specialDinnerDays: specialDays,
+      specialDinnerTotal: computedSpecialTotal,
       payableTotal: Math.max(grandTotal - advanceCredit, 0),
     };
   }, [dailyRows, selectedMonth, settings.advanceByMonth, settings.customTotalByMonth]);
@@ -717,7 +727,12 @@ export default function HomePage() {
         {/* Summary tickets */}
         <section className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[
-            { label: "fixed per day", value: formatCurrency(DAILY_FIXED_COST), sub: "The non-negotiable", delay: 80 },
+            {
+              label: "special dinners",
+              value: formatCurrency(summary.specialDinnerTotal),
+              sub: `${summary.specialDinnerDays} biryani night${summary.specialDinnerDays === 1 ? "" : "s"} × ${formatCurrency(SPECIAL_DINNER_EXTRA)}`,
+              delay: 80,
+            },
             {
               label: "extras total",
               value: formatCurrency(summary.variableTotal),

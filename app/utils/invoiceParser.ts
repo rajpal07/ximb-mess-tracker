@@ -26,7 +26,15 @@ export async function parseInvoicePdf(
   sourceFile: string,
 ): Promise<ParsedInvoiceItem[]> {
   const pdf = await getDocumentProxy(bytes);
-  const { text: rawText } = await extractText(pdf, { mergePages: true });
+  const { text } = await extractText(pdf, { mergePages: true });
+  return parseInvoiceText(text, sourceFile);
+}
+
+/** Text-layer half of the parser, split out so the totals math is testable. */
+export function parseInvoiceText(
+  rawText: string,
+  sourceFile: string,
+): ParsedInvoiceItem[] {
   const text = rawText.split(/\s+/).join(" ");
 
   const dateMatch = text.match(/Invoice Date\s*:?\s*(\d{2}-\d{2}-\d{4})/i);
@@ -37,9 +45,20 @@ export async function parseInvoicePdf(
   const [day, month, year] = dateMatch[1].split("-");
   const dateStr = `${year}-${month}-${day}`;
 
-  // Pattern to match structured item rows and extract:
+  // Match structured item rows and extract:
   // 1. SNo, 2. Item Name (alphabets only), 3. Qty, 4. Total Price
-  const rowPattern = /\b(\d+)\s+([A-Z][A-Z\s&.-]*?)(?:\s+\d+)?\s+(\d+(?:\.\d+)?)\s*PC(?:\s+[A-Z])?\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+(\d+(?:\.\d+)?)\b/gi;
+  //   1 MINARAL WATER 7 1.0BT L 7.00 7.00 0.00 7.00 0.00 0.00 0.00 7.00
+  //   ^ ^item         ^HSN ^qty ^unit  \______ 7 numeric columns ____/ ^total
+  // The unit is whatever the vendor sells in (PC, BTL, NOS, PKT...) and the PDF
+  // text layer often splits it mid-token, so `BTL` arrives as `BT L`. Match any
+  // alpha unit in up to two chunks rather than hardcoding one.
+  const rowPattern = /\b(\d+)\s+([A-Z][A-Z\s&.-]*?)(?:\s+\d+)?\s+(\d+(?:\.\d+)?)\s*(?:[A-Z]+(?:\s+[A-Z]+)?)\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+(\d+(?:\.\d+)?)\b/gi;
+
+  // The invoice's own printed total is the source of truth; the row regex is a
+  // best-effort itemisation on top of it.
+  const totalMatches = [...text.matchAll(/Total Invoice Amount(?: After Tax)?\s*(\d+(?:\.\d{1,2})?)/gi)];
+  const printedTotal =
+    totalMatches.length > 0 ? parseFloat(totalMatches[totalMatches.length - 1][1]) : 0;
 
   const matches = [...text.matchAll(rowPattern)];
   const itemsList: ParsedInvoiceItem[] = [];
@@ -67,15 +86,28 @@ export async function parseInvoicePdf(
       : sourceFile.replace(/\.[^/.]+$/, "");
     fallbackItem = fallbackItem.replace(/\s*\d+\s*$/, "");
 
-    const totalMatches = [...text.matchAll(/Total Invoice Amount(?: After Tax)?\s*(\d+(?:\.\d{1,2})?)/gi)];
-    const grandTotal =
-      totalMatches.length > 0 ? parseFloat(totalMatches[totalMatches.length - 1][1]) : 0.0;
-
     itemsList.push({
       date: dateStr,
       item: fallbackItem,
       sourceFile,
-      total: grandTotal,
+      total: printedTotal,
+    });
+
+    return itemsList;
+  }
+
+  // Reconcile: the row regex needs an exact column count and a `PC` unit, so it
+  // silently drops rows it cannot match, and it never sees tax lines. Book the
+  // difference against the invoice's printed total so the tracker can never
+  // undercount what the mess actually billed.
+  const parsedSum = itemsList.reduce((sum, entry) => sum + entry.total, 0);
+  const delta = printedTotal - parsedSum;
+  if (printedTotal > 0 && Math.abs(delta) >= 0.5) {
+    itemsList.push({
+      date: dateStr,
+      item: delta > 0 ? "Tax / Unparsed Items" : "Invoice Adjustment",
+      sourceFile,
+      total: Math.round(delta * 100) / 100,
     });
   }
 
